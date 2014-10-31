@@ -1,0 +1,103 @@
+# vim: filetype=yaml
+
+name: forklift
+version: 0.0.1-alpha1
+description: The practical package manger.
+
+keywrods: [fl,build,package,package manger,yum,apt, install]
+
+private: false
+repository: https://index.forklift.io/fl
+bugs: https://github.com/forklift/fl-go/issues
+
+official: true
+authors: [omeid <public@omeid.me>]
+license: MIT-style <https://?????.???/LICENSE> 
+homepage: https://github.com/microcloud-io/forklift
+
+
+# This is the list of packages that are required to build
+# the package. If your build dependency doesn't exist.
+# Please donate it, or open an issue:
+# https://github.com/forklift-packages/meta-requests/issue
+
+build-dependencies:
+  - go:  ^1.3
+  - git: ^1.9
+
+# This section is run before building the package
+# on build system.
+build:
+  - mkdir -p root/bin root/etc/forklift/installed
+  - go build -o root/bin/fl github.com/forklift/fl-go/fl
+
+# This section is run after building the package,
+# or executing `fl clean` from package directory
+# on build system.
+
+clean:
+  - rm -rf root src
+
+
+# Right now, there isn't much about package type but
+# please specify one that applies.
+#
+# lib:         A shared library.
+#
+# application: Any program used by user, like a text editor
+#              or a network manager.
+#
+# service:     Any program that provides a services, like a
+#              web server or ssh server.
+#
+# config:      This package provides configurations, it is allowed
+#              to override the base package files. Package name must
+#              be [base]-config. eg: nginx-config for package nginx.
+#              Discuss: issue/URL. TODO:!!
+type: system
+
+main: bin/fl
+
+# Runtime dependencies.
+#
+# For config packages, it must be the base package 
+# only, do NOT list base package dependncies here.
+
+dependencies:
+  - libc: 4.3
+
+# The package files.
+# You must also list all files that are expected to be produced
+# during build.
+files:
+ - bin/fl
+ - etc/forklift/
+ - etc/forklift/installed/
+
+
+
+# This section is run after the package
+# files are copied on system.
+# So you may call the package binaries
+# if you need to, see Busybox package for
+# a better reference.
+
+install:
+  - echo "No post install needed. Happy Forklifting!"
+
+# This section is run before the package
+# files are removed from system.
+# So you may call the package binaries
+# if you need to for clean up.
+
+# Do not delete the package files, they are
+# handled by the package manger, removing any
+# package file will result into warnnings.
+
+uninstall:
+ - mkdir -p /etc/installed-packages/
+ - cp -r etc/forklift/installed etc/installed-packages
+ - rm /etc/forklift/installed/Forklift-*
+ - echo "Meta data is kept under /etc/installed-packages"
+ - echo "but they're not neccessary for system function."
+ - echo "You may remove the folder."
