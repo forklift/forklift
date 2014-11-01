@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"path"
 
 	"github.com/omeid/semver"
@@ -23,9 +22,6 @@ func Tag(name string, version *semver.Version) string {
 	return fmt.Sprintf("%s-%s.flp", name, version.String(true))
 }
 
-type Fetcher interface {
-	Fetch(string, string) (io.Reader, error) //Accept package name and a range provide the best option's through an io.Reader
-}
 type File struct {
 	Meta tar.Header
 	Data bytes.Buffer

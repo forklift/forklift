@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/codegangsta/cli"
+	"github.com/forklift/flp"
 )
 
 var show = cli.Command{
@@ -54,26 +55,20 @@ func showAction(c *cli.Context) {
 		Log(err, true, 1)
 	}
 
-	fmt.Printf("nv %+v\n", nv)
-	latest, err := repo.Get(nv.Name, nv.Version)
+	pack, err := repo.Fetch(nv.Name, nv.Version)
 	if err != nil {
 		Log(err, true, 1)
 	}
 
-	fmt.Printf("latest %+v\n", latest)
-
-	//latest, _ := semver.NewVersion("")
-	//r := *config.R
-	//r.Path = path.Join(arg, flp.Tag(arg, latest))
-
-	/*pkg, err := flp.Fetch(r, true)
+	pkg, err := flp.Unpack(pack, true)
 	if err != nil {
-		Log(err, true, 1)
+		Log(err, true, LOG_ERR)
 	}
 
-	t := template.Must(template.New("packageinfo").Parse(packageInfoTemplate))
-	err = t.Execute(os.Stdout, pkg)
+	templates.New("packagesinfo").Parse(packageInfoTemplate)
+
+	err = templates.ExecuteTemplate(os.Stdout, "packagesinfo", pkg)
 	if err != nil {
-		Log(err, true, 1)
-	}*/
+		Log(err, true, LOG_ERR)
+	}
 }

@@ -2,9 +2,9 @@ package providers
 
 import (
 	"errors"
+	"io"
 	"strings"
 
-	"github.com/forklift/fl/flp"
 	"github.com/omeid/semver"
 )
 
@@ -47,5 +47,5 @@ type Provider interface {
 	Versions() ([]string, error)
 	Get(string, string) (*semver.Version, error) //Accept package name and a range provide the best option, empty if no matching version.
 
-	flp.Fetcher
+	Fetch(string, string) (io.Reader, error) //Accept package name and a range provide the best option's through an io.Reader
 }
