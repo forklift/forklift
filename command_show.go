@@ -1,16 +1,14 @@
 package main
 
 import (
-	"path"
+	"fmt"
 
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl/flp"
-	"github.com/omeid/semver"
 )
 
 var show = cli.Command{
 	Name:   "show",
-	Usage:  "Display details about a package or group of packages.",
+	Usage:  "Display details about a package.",
 	Action: showAction,
 }
 
@@ -51,9 +49,22 @@ func showAction(c *cli.Context) {
 		Log(err, true, 1)
 	}
 
-	latest, _ := semver.NewVersion("")
-	r := *config.R
-	r.Path = path.Join(arg, flp.Tag(arg, latest))
+	nv, err := NewNameVersion(arg)
+	if err != nil {
+		Log(err, true, 1)
+	}
+
+	fmt.Printf("nv %+v\n", nv)
+	latest, err := repo.Get(nv.Name, nv.Version)
+	if err != nil {
+		Log(err, true, 1)
+	}
+
+	fmt.Printf("latest %+v\n", latest)
+
+	//latest, _ := semver.NewVersion("")
+	//r := *config.R
+	//r.Path = path.Join(arg, flp.Tag(arg, latest))
 
 	/*pkg, err := flp.Fetch(r, true)
 	if err != nil {

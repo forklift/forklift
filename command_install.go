@@ -2,16 +2,11 @@ package main
 
 import (
 	"archive/tar"
-	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
-	"sort"
 
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl/flp"
-	"github.com/hashicorp/go-version"
 )
 
 var install = cli.Command{
@@ -28,47 +23,39 @@ var install = cli.Command{
 }
 
 func installAction(c *cli.Context) {
+	/*
+		name := c.Args().First()
 
-	name := c.Args().First()
-
-	if name == "" {
-		cli.ShowSubcommandHelp(c)
-		return
-	}
-	err := GetIndex()
-	if err != nil {
-		Log(err, true, 1)
-	}
-
-	versionsRaw, exists := index[name]
-	if !exists || len(versionsRaw) == 0 {
-		Log(fmt.Errorf("Package %s not found.", name), true, 1)
-	}
-
-	versions := make([]*version.Version, len(versionsRaw))
-	for i, raw := range versionsRaw {
-		v, _ := version.NewVersion(raw)
-		versions[i] = v
-	}
-
-	sort.Sort(version.Collection(versions))
-
-	latest := versions[0]
-
-	r := *config.R
-	r.Path = path.Join(name, flp.Tag(name, latest))
-
-	pkg, err := flp.Fetch(r, false)
-	if err != nil {
-		Log(err, true, 1)
-	}
-	for _, file := range pkg.FilesReal {
-		err := makeNode(file.Meta, &file.Data, c.String("root"))
-		if err != nil {
-			Log(err, true, 1) //Clean up here.
+		if name == "" {
+			cli.ShowSubcommandHelp(c)
+			return
 		}
-	}
-	Log(fmt.Errorf("Package %s installed successfuly.", name), false, 2)
+		versions := make([]*version.Version, len(versionsRaw))
+		for i, raw := range versionsRaw {
+			v, _ := version.NewVersion(raw)
+			versions[i] = v
+		}
+
+		sort.Sort(version.Collection(versions))
+
+		latest := versions[0]
+
+		r := *config.R
+		r.Path = path.Join(name, flp.Tag(name, latest))
+
+		pkg, err := flp.Fetch(r, false)
+		if err != nil {
+			Log(err, true, 1)
+		}
+		for _, file := range pkg.FilesReal {
+			err := makeNode(file.Meta, &file.Data, c.String("root"))
+			if err != nil {
+				Log(err, true, 1) //Clean up here.
+			}
+		}
+
+		Log(fmt.Errorf("Package %s installed successfuly.", name), false, 2)
+	*/
 }
 
 func makeNode(meta tar.Header, content io.Reader, root string) error {

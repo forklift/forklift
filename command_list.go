@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"strings"
+	"os"
 
 	"github.com/codegangsta/cli"
 )
@@ -13,21 +12,41 @@ var list = cli.Command{
 	Action: listAction,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "files",
-			Usage: "Files",
+			Name:  "filter",
+			Usage: "Filter packages.",
 		},
 	},
 }
 
+var (
+	//TODO: Trim the end slashes spaces.
+	packagesListTemplate = ` Listing Packages From: {{.Location}}{{if .Packages}}
+{{range .Packages}}
+   {{ . }}{{ end }}{{else}} 
+No Packages Found.{{end}}
+`
+)
+
 func listAction(c *cli.Context) {
 	//TODO: Prettify this.
+
+	arg := c.Args().First()
+
+	if arg == "" {
+		arg = "*"
+	}
+
+	repo.SetFilter(arg)
 
 	err := repo.Update()
 	if err != nil {
 		Log(err, true, 1)
 	}
 
-	for name, versions := range repo.Iterator() {
-		fmt.Printf(" %-15.15s: %s\n", name, strings.Join(versions, ", "))
+	templates.New("packageslist").Parse(packagesListTemplate)
+
+	err = templates.ExecuteTemplate(os.Stdout, "packageslist", repo)
+	if err != nil {
+		Log(err, true, LOG_ERR)
 	}
 }

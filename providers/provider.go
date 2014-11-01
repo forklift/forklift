@@ -3,6 +3,9 @@ package providers
 import (
 	"errors"
 	"strings"
+
+	"github.com/forklift/fl/flp"
+	"github.com/omeid/semver"
 )
 
 var List = map[string]Provider{}
@@ -13,7 +16,7 @@ var (
 	ErrorNoSuchProvider         = errors.New("No Such Provider.")
 )
 
-func GetProvider(pp string) (*Provider, error) {
+func NewProvider(pp string) (*Provider, error) {
 	if pp == "" {
 		return nil, ErrorPackageProviderMissing
 	}
@@ -32,15 +35,17 @@ func GetProvider(pp string) (*Provider, error) {
 }
 
 type Provider interface {
-	Iterator() map[string][]string
-
 	SetLocation(string) error
+	Location() string
+
 	Update() error
-	Get(string) []string
-}
 
-type provider struct {
-	Index map[string][]string
-}
+	//TODO:There should be away to get ride of the SetFilter method
+	// And pass the filter directly to Packagees and Version methods.
+	SetFilter(string)
+	Packages() []string
+	Versions() ([]string, error)
+	Get(string, string) (*semver.Version, error) //Accept package name and a range provide the best option, empty if no matching version.
 
-func (p *provider) Iterator() map[string][]string { return p.Index }
+	flp.Fetcher
+}

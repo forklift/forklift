@@ -3,13 +3,16 @@ package main
 import (
 	"fmt"
 	"os"
+	"text/template"
 
 	"github.com/codegangsta/cli"
+	"github.com/forklift/fl/providers"
 )
 
 //Behold the globals.
 var (
-	repo Provider
+	repo      providers.Provider
+	templates = new(template.Template)
 )
 
 const (
@@ -29,8 +32,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "forklift"
-	app.Usage = "The practical package manger."
-
+	app.Usage = "The software provisioning tool."
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
 			Name:  "verbose",
@@ -49,20 +51,21 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
-		build,
 		list,
+		versions,
 		show,
+		build,
 		clean,
 	}
 
 	app.Before = func(c *cli.Context) error {
 
-		var err error
-		provider, location := split(c.String("repo"), ":")
+		provider, err := providers.NewProvider(c.String("provider"))
 		if err != nil {
 			Log(err, true, LOG_ERR)
+			return err
 		}
-
+		repo = *provider
 		return nil
 	}
 	app.Run(os.Args)
