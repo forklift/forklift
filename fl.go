@@ -2,27 +2,21 @@ package main
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl-go/flp"
 )
-
-type Config struct {
-	Cache bool
-	R     *url.URL `json:"-"`
-}
 
 //Behold the globals.
 var (
-	config Config
+	repo Provider
 )
 
 const (
 	LOG_ERR int = iota
 	LOG_WARN
 	LOG_INFO
+	OFFICIAL_PROVIDER = "s3:https://forklift.microcloud.io"
 )
 
 func Log(err error, fatal bool, level int) {
@@ -42,34 +36,31 @@ func main() {
 			Name:  "verbose",
 			Usage: "Be talkative.",
 		},
+		cli.StringFlag{
+			Name:   "provider",
+			Value:  OFFICIAL_PROVIDER,
+			Usage:  "Repository Address. `type:location`",
+			EnvVar: "FORKLIFT_REPO",
+		},
 	}
 
 	app.Action = func(c *cli.Context) {
-		fmt.Println("Main")
+		cli.ShowSubcommandHelp(c)
 	}
 
 	app.Commands = []cli.Command{
 		build,
 		list,
 		show,
-		install,
 		clean,
 	}
 
 	app.Before = func(c *cli.Context) error {
 
-		repo_url := os.Getenv("FORKLIFT_REPO")
-		if repo_url == "" {
-
-			Log(fmt.Errorf("Using official repo. %s\n", repo_url), false, LOG_WARN)
-			repo_url = flp.OFFICIAL_REGISTRY
-		}
-
 		var err error
-
-		config.R, err = url.Parse(repo_url)
+		provider, location := split(c.String("repo"), ":")
 		if err != nil {
-			Log(err, true, 0)
+			Log(err, true, LOG_ERR)
 		}
 
 		return nil

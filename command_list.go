@@ -22,12 +22,12 @@ var list = cli.Command{
 func listAction(c *cli.Context) {
 	//TODO: Prettify this.
 
-	err := GetIndex()
+	err := repo.Update()
 	if err != nil {
 		Log(err, true, 1)
 	}
 
-	for name, versions := range index {
+	for name, versions := range repo.Iterator() {
 		fmt.Printf(" %-15.15s: %s\n", name, strings.Join(versions, ", "))
 	}
 }

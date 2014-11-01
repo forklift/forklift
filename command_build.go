@@ -8,7 +8,7 @@ import (
 	"os/exec"
 
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl:/flp"
+	"github.com/forklift/fl/flp"
 
 	"gopkg.in/yaml.v2"
 )

@@ -10,7 +10,7 @@ import (
 	"sort"
 
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl-go/flp"
+	"github.com/forklift/fl/flp"
 	"github.com/hashicorp/go-version"
 )
 

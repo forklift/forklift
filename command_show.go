@@ -1,14 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"path"
-	"text/template"
 
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl-go/flp"
-	"github.com/hashicorp/go-version"
+	"github.com/forklift/fl/flp"
+	"github.com/omeid/semver"
 )
 
 var show = cli.Command{
@@ -39,36 +36,26 @@ DEPENDENCIES  {{/* .Dependencies */}}
 
 INSTALL   
 UNINSTALL 
-
 `
 
 func showAction(c *cli.Context) {
 
-	name := c.Args().First()
+	arg := c.Args().First()
 
-	if name == "" {
+	if arg == "" {
 		cli.ShowSubcommandHelp(c)
 		return
 	}
-	err := GetIndex()
+	err := repo.Update()
 	if err != nil {
 		Log(err, true, 1)
 	}
 
-	versions, exists := index[name]
-	if !exists || len(versions) == 0 {
-		Log(fmt.Errorf("Package %s not found.", name), true, 1)
-	}
-
-	latest, err := version.Latest(versions)
-	if err != nil {
-		Log(err, true, 1)
-	}
-
+	latest, _ := semver.NewVersion("")
 	r := *config.R
-	r.Path = path.Join(name, flp.Tag(name, latest))
+	r.Path = path.Join(arg, flp.Tag(arg, latest))
 
-	pkg, err := flp.Fetch(r, true)
+	/*pkg, err := flp.Fetch(r, true)
 	if err != nil {
 		Log(err, true, 1)
 	}
@@ -77,5 +64,5 @@ func showAction(c *cli.Context) {
 	err = t.Execute(os.Stdout, pkg)
 	if err != nil {
 		Log(err, true, 1)
-	}
+	}*/
 }
