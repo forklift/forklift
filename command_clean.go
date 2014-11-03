@@ -24,7 +24,7 @@ func cleanAction(c *cli.Context) {
 }
 
 func runClean(pkg *flp.Package) {
-	err := runCommands("Cleaning.", pkg.Build, true)
+	err := runCommands("Cleaning.", pkg.Clean, true)
 	if err != nil {
 		Log(errors.New("Cleaning faild."), false, LOG_ERR)
 	}
