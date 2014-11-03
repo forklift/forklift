@@ -1,11 +1,8 @@
 package engine
 
 import (
-	"archive/tar"
 	"errors"
 	"io"
-	"os"
-	"path/filepath"
 	"syscall"
 
 	"github.com/forklift/fl/flp"
@@ -80,17 +77,10 @@ func (e Engine) Install(pack io.Reader, root string) error {
 		return err
 	}
 
-	pkg, err := flp.Unpack(pack, false)
+	pkg, err := flp.Unpack(pack, root, false)
 	if err != nil {
 		Log.Error(err)
 		return err
-	}
-
-	for _, file := range pkg.FilesReal {
-		err := makeNode(file.Meta, &file.Data, root)
-		if err != nil {
-			Log(err, true, LOG_ERR) //Clean up here.
-		}
 	}
 
 	err = runCommands("Post Install", pkg.Install, true)
@@ -102,44 +92,4 @@ func (e Engine) Install(pack io.Reader, root string) error {
 
 	Log.Print("Package installed successfuly.", pkg.Version)
 	return nil
-}
-
-//Helper function for Install.
-func makeNode(meta tar.Header, content io.Reader, root string) error {
-
-	Path := filepath.Join(root, meta.Name)
-
-	if meta.Typeflag == tar.TypeDir {
-		err := os.MkdirAll(Path, os.FileMode(meta.Mode))
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-
-	if meta.Typeflag == tar.TypeSymlink {
-		err := os.Symlink(meta.Linkname, Path)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-
-	file, err := os.Create(Path)
-	defer file.Close()
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(file, content)
-	if err != nil {
-		return err
-	}
-	err = file.Chmod(os.FileMode(meta.Mode))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func Uninstall(name string) error {
 }

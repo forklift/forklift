@@ -5,11 +5,13 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v2"
 )
 
-func Unpack(pack io.Reader, stabOnly bool) (*Package, error) {
+func Unpack(pack io.Reader, root string, MetaOnly bool) (*Package, error) {
 
 	tar := tar.NewReader(pack)
 
@@ -31,11 +33,10 @@ func Unpack(pack io.Reader, stabOnly bool) (*Package, error) {
 		return nil, ErrInvalidForkliftfile
 	}
 
-	if stabOnly {
+	if MetaOnly {
 		return pkg, nil
 	}
 
-	pkg.FilesReal = make(map[string]File)
 	for {
 		hdr, err := tar.Next()
 		if err == io.EOF {
@@ -46,15 +47,51 @@ func Unpack(pack io.Reader, stabOnly bool) (*Package, error) {
 			return nil, err
 		}
 
-		f := new(File)
-		f.Meta = *hdr
-
-		_, err = io.Copy(&f.Data, tar)
-
+		err = makeNode(*hdr, tar, root)
 		if err != nil {
 			return nil, err
 		}
-		pkg.FilesReal[hdr.Name] = *f
 	}
 	return pkg, nil
+}
+
+//Helper function for Install.
+func makeNode(meta tar.Header, content io.Reader, root string) error {
+
+	Path := filepath.Join(root, meta.Name)
+
+	if meta.Typeflag == tar.TypeDir {
+		err := os.MkdirAll(Path, os.FileMode(meta.Mode))
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	if meta.Typeflag == tar.TypeSymlink {
+		err := os.Symlink(meta.Linkname, Path)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	file, err := os.Create(Path)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(file, content)
+	if err != nil {
+		return err
+	}
+	err = file.Chmod(os.FileMode(meta.Mode))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Uninstall(name string) error {
+	return nil
 }

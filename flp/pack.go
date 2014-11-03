@@ -3,7 +3,6 @@ package flp
 import (
 	"archive/tar"
 	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -32,7 +31,7 @@ func Pack(pkg *Package, storage io.WriteCloser) (checksum []byte, err error) {
 		checksum = hash.Sum(nil)
 	}()
 
-	ver, err := semver.NewVersion(pkg.Version)
+	_, err = semver.NewVersion(pkg.Version)
 	if err != nil {
 		return nil, errors.New("Invalid Package name or version.")
 	}
@@ -45,16 +44,16 @@ func Pack(pkg *Package, storage io.WriteCloser) (checksum []byte, err error) {
 	pkg.Files = append([]string{"Forkliftfile"}, pkg.Files...)
 
 	//Add files to the package.
-	for _, path := range files {
+	for _, path := range pkg.Files {
 		err = writeFile(path, tar)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	checksum = hex.EncodeToString(sum)
+	checksum = hash.Sum(nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	return checksum, nil
 }

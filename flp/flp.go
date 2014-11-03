@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/forklift/fl/flp"
 	"github.com/omeid/semver"
 	"gopkg.in/yaml.v2"
 )
@@ -58,13 +57,10 @@ type Package struct {
 	BuildDependencies []map[string]string `yaml:"build-dependencies"`
 	Build             []string
 	Clean             []string
-
-	isStab    bool            `yaml:"-"`
-	FilesReal map[string]File `yaml:"-"`
 }
 
-func NewPackage(pkg []byte) (*Package, error) {
-	pkg := new(flp.Package)
+func NewPackage(Forkliftfile []byte) (*Package, error) {
+	pkg := new(Package)
 	return pkg, yaml.Unmarshal(Forkliftfile, &pkg)
 }
 
