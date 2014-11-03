@@ -2,11 +2,15 @@ package main
 
 import (
 	"archive/tar"
+	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"syscall"
 
 	"github.com/codegangsta/cli"
+	"github.com/forklift/fl/flp"
 )
 
 var install = cli.Command{
@@ -23,39 +27,62 @@ var install = cli.Command{
 }
 
 func installAction(c *cli.Context) {
-	/*
-		name := c.Args().First()
 
-		if name == "" {
-			cli.ShowSubcommandHelp(c)
-			return
-		}
-		versions := make([]*version.Version, len(versionsRaw))
-		for i, raw := range versionsRaw {
-			v, _ := version.NewVersion(raw)
-			versions[i] = v
-		}
+	arg := c.Args().First()
 
-		sort.Sort(version.Collection(versions))
+	if arg == "" {
+		cli.ShowSubcommandHelp(c)
+		return
+	}
+	err := repo.Update()
+	if err != nil {
+		Log(err, true, LOG_ERR)
+	}
 
-		latest := versions[0]
+	nv, err := NewNameVersion(arg)
+	if err != nil {
+		Log(err, true, LOG_ERR)
+	}
 
-		r := *config.R
-		r.Path = path.Join(name, flp.Tag(name, latest))
+	pack, err := repo.Fetch(nv.Name, nv.Version)
+	if err != nil {
+		Log(err, true, LOG_ERR)
+	}
 
-		pkg, err := flp.Fetch(r, false)
+	pkg, err := flp.Unpack(pack, false)
+	if err != nil {
+		Log(err, true, LOG_ERR)
+	}
+
+	root := c.String("root")
+	for _, file := range pkg.FilesReal {
+		err := makeNode(file.Meta, &file.Data, root)
 		if err != nil {
-			Log(err, true, LOG_ERR)
+			Log(err, true, LOG_ERR) //Clean up here.
 		}
-		for _, file := range pkg.FilesReal {
-			err := makeNode(file.Meta, &file.Data, c.String("root"))
-			if err != nil {
-				Log(err, true, LOG_ERR) //Clean up here.
-			}
-		}
+	}
 
-		Log(fmt.Errorf("Package %s installed successfuly.", name), false, 2)
-	*/
+	if root != "/" {
+		//Not using the default root, so we need to chroot (Change root).
+		//This requires root user or sudo access.
+		//Can probably be fix with fakeroot/fakechroot.
+		err = syscall.Chroot(root)
+	} else {
+		//All post comand installs are run from / of filesystem.
+		err = os.Chdir("/")
+	}
+	if err != nil {
+		Log(err, true, LOG_ERR)
+	}
+
+	err = runCommands("Post Install", pkg.Install, true)
+	if err != nil {
+		Log(errors.New("Post install Faild. Uninstalling."), false, LOG_WARN)
+		runClean(pkg)
+		Log(err, true, LOG_ERR) //We can die now. :/
+	}
+
+	Log(fmt.Errorf("Package %s installed successfuly.", pkg.Version), false, 2)
 }
 
 func makeNode(meta tar.Header, content io.Reader, root string) error {

@@ -30,6 +30,7 @@ type File struct {
 type Package struct {
 	Name        string
 	Version     string
+	License     string
 	Description string
 
 	Keywrods []string
@@ -38,10 +39,11 @@ type Package struct {
 	Repository string
 	Bugs       string
 
-	Official bool
-	Authors  []string
-	License  string
+	Official    bool
+	Maintainers []string
+
 	Homepage string
+	Authors  []string
 
 	Type         string
 	Main         string

@@ -18,6 +18,7 @@ var show = cli.Command{
 var packageInfoTempate = `NAME               {{.Name}}
 VERSION            {{ .Version }} 
 DESCRIPTION        {{.Description}}
+LICENSE            {{ .License  }} 
 KEYWRODS           {{ .Keywrods }} 
 
 PRIVATE            {{ .Private  }} 
@@ -25,10 +26,12 @@ REPOSITORY         {{ .Repository }}
 BUGS               {{ .Bugs     }} 
 
 OFFICIAL           {{ .Official }} 
+MAINTAINERS {{ range .Maintainers }}{{.}}
+                   {{end}}
+
+HOMEPAGE           {{ .Homepage }} 
 AUTHORS            {{ range .Authors }}{{.}}
                    {{end}}
-LICENSE            {{ .License  }} 
-HOMEPAGE           {{ .Homepage }} 
 
 TYPE               {{ .Type }} 
 
