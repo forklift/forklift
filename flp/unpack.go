@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func Unpack(pack io.Reader, stabOnly bool, path string) (*Package, error) {
+func Unpack(pack io.Reader, stabOnly bool) (*Package, error) {
 
 	tar := tar.NewReader(pack)
 
