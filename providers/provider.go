@@ -38,14 +38,12 @@ type Provider interface {
 	SetLocation(string) error
 	Location() string
 
-	Update() error
+	Ping() bool                               //Used for remote providers to check network
+	Packages(string) []string                 //List all pacages, accepts a filter.
+	Versions(string) ([]string, error)        //List all versions of a package.
+	Fetch(*semver.Version) (io.Reader, error) //Fetches a specific package.
 
-	//TODO:There should be away to get ride of the SetFilter method
-	// And pass the filter directly to Packagees and Version methods.
-	SetFilter(string)
-	Packages() []string
-	Versions() ([]string, error)
-	Get(string, string) (*semver.Version, error) //Accept package name and a range provide the best option, empty if no matching version.
-
-	Fetch(string, string) (io.Reader, error) //Accept package name and a range provide the best option's through an io.Reader
+	// Provides the location for the source of a specific version
+	// Fetch, and extract if neccessary.
+	Source(*semver.Version) (string, error)
 }

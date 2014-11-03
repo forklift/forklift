@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"path"
 	"regexp"
 	"strings"
@@ -22,8 +21,7 @@ func init() {
 
 //				 Name     Versions
 type Local struct {
-	location *url.URL
-	f        string //The filter. TODO: Remove it.
+	f string //The filter. TODO: Remove it.
 
 	index struct {
 		XMLNAME  xml.Name `xml:"pre"`
@@ -32,44 +30,41 @@ type Local struct {
 }
 
 func (p *Local) SetLocation(location string) error {
-	var err error
-	p.location, err = url.Parse(location)
-	return err
+	return nil
 }
 
 func (p Local) Location() string {
-	return p.location.String()
+	return "Not Location Support."
 }
 
 func (p *Local) Update() error {
 
-	if p.location == nil {
-		return errors.New("Provider unset.")
-	}
-
-	var err error
-	r := "^[a-zA-Z0-9].*/$"
-
-	if p.f != "" && p.f != "*" {
-		r = p.f + ".*/"
-	}
-
-	reg, err := regexp.Compile(r)
-	if err != nil {
-		return err
-	}
-
-	f := func(v string, o *string) bool {
-		*o = strings.TrimRight(v, "/")
-		return reg.MatchString(v)
-	}
-	p.index.Packages, err = util.GetHTMLElements(p.location.String(), "a", "href", f)
-
-	if err != nil {
-		return err
-	}
-
+	//No update support.
 	return nil
+	//
+	//	var err error
+	//	r := "^[a-zA-Z0-9].*/$"
+	//
+	//	if p.f != "" && p.f != "*" {
+	//		r = p.f + ".*/"
+	//	}
+	//
+	//	reg, err := regexp.Compile(r)
+	//	if err != nil {
+	//		return err
+	//	}
+	//
+	//	f := func(v string, o *string) bool {
+	//		*o = strings.TrimRight(v, "/")
+	//		return reg.MatchString(v)
+	//	}
+	//	p.index.Packages, err = util.GetHTMLElements(p.location.String(), "a", "href", f)
+	//
+	//	if err != nil {
+	//		return err
+	//	}
+	//
+	//	return nil
 }
 
 func (p *Local) SetFilter(f string) {

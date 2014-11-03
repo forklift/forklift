@@ -80,19 +80,19 @@ func (p *GO) Packages() []string {
 	return p.index.Packages
 }
 
-func (p *GO) Versions() ([]string, error) {
+func (p *GO) Versions(filter string) ([]string, error) {
 
 	versions := []string{}
 
 	if p.location == nil {
-		return versions, errors.New("Package not found.")
+		return versions, errors.New("Location is not set.")
 	}
 
 	u := *p.location
 
-	u.Path = path.Join(u.Path, p.f) + "/"
+	u.Path = path.Join(u.Path, filter) + "/"
 
-	reg, err := regexp.Compile("^" + p.f + "(-[0-9].*)?$")
+	reg, err := regexp.Compile("^" + filter + "(-[0-9].*)?$")
 	if err != nil {
 		return versions, err
 	}
