@@ -3,19 +3,25 @@ package flp
 import (
 	"archive/tar"
 	"crypto/sha256"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
+
+	"github.com/omeid/semver"
 )
 
-func Pack(files []string, storage io.WriteCloser) (checksum []byte, err error) {
+func Pack(pkg *Package, storage io.WriteCloser) (checksum []byte, err error) {
 
 	hash := sha256.New()
 	w := io.MultiWriter(storage, hash)
 
 	tar := tar.NewWriter(w)
 
+	//Taking care of closing everything.
 	defer func() {
 		if e := tar.Close(); e != nil && err == nil {
 			err = e
@@ -26,11 +32,29 @@ func Pack(files []string, storage io.WriteCloser) (checksum []byte, err error) {
 		checksum = hash.Sum(nil)
 	}()
 
+	ver, err := semver.NewVersion(pkg.Version)
+	if err != nil {
+		return nil, errors.New("Invalid Package name or version.")
+	}
+
+	for i, p := range pkg.Files {
+		pkg.Files[i] = path.Join("root", p)
+	}
+
+	//Add Forkliftfile as first File without the root prefix.
+	pkg.Files = append([]string{"Forkliftfile"}, pkg.Files...)
+
+	//Add files to the package.
 	for _, path := range files {
 		err = writeFile(path, tar)
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	checksum = hex.EncodeToString(sum)
+	if err != nil {
+		return "", err
 	}
 	return checksum, nil
 }

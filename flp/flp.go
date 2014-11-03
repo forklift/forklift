@@ -5,9 +5,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"path"
 
+	"github.com/forklift/fl/flp"
 	"github.com/omeid/semver"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -58,4 +61,17 @@ type Package struct {
 
 	isStab    bool            `yaml:"-"`
 	FilesReal map[string]File `yaml:"-"`
+}
+
+func NewPackage(pkg []byte) (*Package, error) {
+	pkg := new(flp.Package)
+	return pkg, yaml.Unmarshal(Forkliftfile, &pkg)
+}
+
+func ReadPackage() (*Package, error) {
+	Forkliftfile, err := ioutil.ReadFile("Forkliftfile")
+	if err != nil {
+		return nil, err
+	}
+	return NewPackage(Forkliftfile)
 }

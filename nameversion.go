@@ -15,9 +15,10 @@ var (
 )
 
 type NameVersion struct {
-	Name    string
-	Version string
-	Meta    string
+	Location string
+	Name     string
+	Version  string
+	Meta     string
 }
 
 func NewNameVersion(raw string) (NameVersion, error) {
