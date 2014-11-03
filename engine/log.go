@@ -11,4 +11,5 @@ type Logger interface {
 	Warn(args ...interface{})
 	Error(args ...interface{})
 	Fatal(args ...interface{})
+	Print(args ...interface{})
 }
