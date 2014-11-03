@@ -32,7 +32,7 @@ func versionsAction(c *cli.Context) {
 	repo.SetFilter(arg)
 	err := repo.Update()
 	if err != nil {
-		Log(err, true, 1)
+		Log(err, true, LOG_ERR)
 	}
 
 	templates.New("packageversions").Parse(packageVersionsTemplate)

@@ -45,12 +45,12 @@ func installAction(c *cli.Context) {
 
 		pkg, err := flp.Fetch(r, false)
 		if err != nil {
-			Log(err, true, 1)
+			Log(err, true, LOG_ERR)
 		}
 		for _, file := range pkg.FilesReal {
 			err := makeNode(file.Meta, &file.Data, c.String("root"))
 			if err != nil {
-				Log(err, true, 1) //Clean up here.
+				Log(err, true, LOG_ERR) //Clean up here.
 			}
 		}
 

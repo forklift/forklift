@@ -40,7 +40,7 @@ func listAction(c *cli.Context) {
 
 	err := repo.Update()
 	if err != nil {
-		Log(err, true, 1)
+		Log(err, true, LOG_ERR)
 	}
 
 	templates.New("packageslist").Parse(packagesListTemplate)

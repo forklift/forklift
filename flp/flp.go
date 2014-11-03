@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	ErrInvalidForkliftjson = errors.New("Invalid Forkliftfile")
-	ErrMissingForkliftjson = errors.New("No Forkliftfile")
+	ErrInvalidForkliftfile = errors.New("Invalid Forkliftfile")
+	ErrMissingForkliftfile = errors.New("No Forkliftfile")
 )
 
 func Tag(name string, version *semver.Version) string {
@@ -43,23 +43,16 @@ type Package struct {
 	License  string
 	Homepage string
 
-	BuildDependencies []string `"yaml:"build-dependencies"`
-	Build             []string
-	Clean             []string
-
 	Type         string
 	Main         string
-	Dependencies []string
+	Dependencies []map[string]string
 	Files        []string
 	Install      []string
 	Uninstall    []string
 
-	//DISCUSS: issues/2
-	Runtime struct {
-		Kernel       string
-		LXC          string
-		Libcontainer string
-	}
+	BuildDependencies []map[string]string `yaml:"build-dependencies"`
+	Build             []string
+	Clean             []string
 
 	isStab    bool            `yaml:"-"`
 	FilesReal map[string]File `yaml:"-"`

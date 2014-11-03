@@ -2,8 +2,11 @@ package flp
 
 import (
 	"archive/tar"
-	"encoding/json"
+	"errors"
 	"io"
+	"io/ioutil"
+
+	"gopkg.in/yaml.v2"
 )
 
 func Unpack(pack io.Reader, stabOnly bool) (*Package, error) {
@@ -13,13 +16,19 @@ func Unpack(pack io.Reader, stabOnly bool) (*Package, error) {
 	hdr, err := tar.Next()
 
 	//TODO: Bettter error handling.
-	if err != nil || err == io.EOF || hdr.Name != "forklift.json" {
-		return nil, ErrMissingForkliftjson
+	if err != nil || err == io.EOF || hdr.Name != "Forkliftfile" {
+		return nil, ErrMissingForkliftfile
 	}
 
 	pkg := new(Package)
-	if err := json.NewDecoder(tar).Decode(&pkg); err != nil {
-		return nil, ErrInvalidForkliftjson
+	Forkliftfile, err := ioutil.ReadAll(tar)
+	if err != nil {
+		return nil, errors.New("Error reading Forklift file from tar. This should neverh happen. Please open an issue at github.com/forklift/fl/issues")
+	}
+
+	err = yaml.Unmarshal(Forkliftfile, &pkg)
+	if err != nil {
+		return nil, ErrInvalidForkliftfile
 	}
 
 	if stabOnly {

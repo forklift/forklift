@@ -29,11 +29,13 @@ build-dependencies:
 # on build system.
 build:
   - mkdir -p root/bin root/etc/forklift/installed
-  - go build -o root/bin/fl github.com/forklift/fl-go/fl
+  - go build -o root/bin/fl xgithub.com/forklift/fl/
 
-# This section is run after building the package,
-# or executing `fl clean` from package directory
-# on build system.
+# This section is run after building the package, whatever 
+# the build faild or successed, so write your clean commands
+# in graceful. (They shouldn't assume a successful build.)
+# You can also run `fl clean` to do, for example a, clean up 
+# after fixing a cleanup failur.
 
 clean:
   - rm -rf root src
@@ -64,7 +66,7 @@ main: bin/fl
 # only, do NOT list base package dependncies here.
 
 dependencies:
-  - libc: 4.3
+  - libc: ^4.3
 
 # The package files.
 # You must also list all files that are expected to be produced

@@ -2,9 +2,10 @@ package main
 
 import (
 	"os"
+	"text/template"
 
 	"github.com/codegangsta/cli"
-	"github.com/forklift/flp"
+	"github.com/forklift/fl/flp"
 )
 
 var show = cli.Command{
@@ -13,29 +14,41 @@ var show = cli.Command{
 	Action: showAction,
 }
 
-var packageInfoTemplate = `NAME          {{.Name}}
-DESCRIPTION   {{.Description}}
-VERSION       {{ .Version }} 
-KEYWRODS      {{ .Keywrods }} 
-HOMEPAGE      {{ .Homepage }} 
-BUGS          {{ .Bugs     }} 
+//Perhaps these can be arranged in more appropriate groups?
+var packageInfoTempate = `NAME               {{.Name}}
+VERSION            {{ .Version }} 
+DESCRIPTION        {{.Description}}
+KEYWRODS           {{ .Keywrods }} 
 
-AUTHORS       {{ range .Authors }}{{.}}
-              {{end}}
-OFFICIAL      {{ .Official }} 
-PRIVATE       {{ .Private  }} 
-LICENSE       {{ .License  }} 
+PRIVATE            {{ .Private  }} 
+REPOSITORY         {{ .Repository }}
+BUGS               {{ .Bugs     }} 
 
-TYPE          {{ .Type }} 
-MAIN          {{ .Main }} 
-STRUCTURE{{ range .Structure }}
-              {{ . }}{{end}}
+OFFICIAL           {{ .Official }} 
+AUTHORS            {{ range .Authors }}{{.}}
+                   {{end}}
+LICENSE            {{ .License  }} 
+HOMEPAGE           {{ .Homepage }} 
 
-DEPENDENCIES  {{/* .Dependencies */}} 
+TYPE               {{ .Type }} 
 
-INSTALL   
-UNINSTALL 
-`
+DEPENDENCIES       {{ range $dep:= .Dependencies}}{{ range $name, $ver := $dep}}{{ $name }} {{ $ver }} 
+                   {{ end }} {{ end }}
+FILES              {{ range .Files }}{{ . }}
+                   {{end}}
+INSTALL            {{ range .Install }}{{ . }}
+                   {{end}}
+UNINSTALL          {{ range .Uninstall }}{{ . }}
+                   {{end}}
+
+BUILD DEPENDENCIES {{ range $dep:= .BuildDependencies }}{{ range $name, $ver := $dep}}{{ $name }} {{ $ver }} 
+                   {{ end }}{{ end }}
+
+BUILD              {{ range .Build }}{{ . }} 
+                   {{end}}
+
+CLEAN              {{ range .Clean }}{{ . }}
+                   {{end}}`
 
 func showAction(c *cli.Context) {
 
@@ -47,17 +60,17 @@ func showAction(c *cli.Context) {
 	}
 	err := repo.Update()
 	if err != nil {
-		Log(err, true, 1)
+		Log(err, true, LOG_ERR)
 	}
 
 	nv, err := NewNameVersion(arg)
 	if err != nil {
-		Log(err, true, 1)
+		Log(err, true, LOG_ERR)
 	}
 
 	pack, err := repo.Fetch(nv.Name, nv.Version)
 	if err != nil {
-		Log(err, true, 1)
+		Log(err, true, LOG_ERR)
 	}
 
 	pkg, err := flp.Unpack(pack, true)
@@ -65,9 +78,9 @@ func showAction(c *cli.Context) {
 		Log(err, true, LOG_ERR)
 	}
 
-	templates.New("packagesinfo").Parse(packageInfoTemplate)
+	template.Must(templates.New("packageinfo").Parse(packageInfoTempate))
 
-	err = templates.ExecuteTemplate(os.Stdout, "packagesinfo", pkg)
+	err = templates.ExecuteTemplate(os.Stdout, "packageinfo", pkg)
 	if err != nil {
 		Log(err, true, LOG_ERR)
 	}

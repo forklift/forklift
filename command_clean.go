@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/json"
-	"io"
-	"os"
-	"os/exec"
+	"errors"
 
 	"github.com/codegangsta/cli"
 	"github.com/forklift/fl/flp"
@@ -18,27 +15,17 @@ var clean = cli.Command{
 
 func cleanAction(c *cli.Context) {
 
-	forkliftjson, err := os.Open("forklift.json")
+	pkg, err := getFileSystemPackage()
 	if err != nil {
-		Log(err, true, 1)
-	}
-	pkg := new(flp.Package)
-
-	err = json.NewDecoder(forkliftjson).Decode(&pkg)
-	if err != nil {
-		Log(err, true, 1)
+		Log(err, true, LOG_ERR)
 	}
 
-	//TODO: Complain about extrenious or missing files.
-	//Add support for .forkliftignore
+	runClean(pkg)
+}
 
-	for _, cmd := range pkg.Clean {
-		cmd := exec.Command("sh", "-c", cmd)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		if err != nil && err != io.EOF {
-			Log(err, true, 1)
-		}
+func runClean(pkg *flp.Package) {
+	err := runCommands("Cleaning.", pkg.Build, true)
+	if err != nil {
+		Log(errors.New("Cleaning faild."), false, LOG_ERR)
 	}
 }

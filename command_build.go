@@ -1,16 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
-	"os/exec"
 
 	"github.com/codegangsta/cli"
 	"github.com/forklift/fl/flp"
-
-	"gopkg.in/yaml.v2"
 )
 
 var build = cli.Command{
@@ -21,35 +16,26 @@ var build = cli.Command{
 
 func buildAction(c *cli.Context) {
 
-	Forkliftfile, err := ioutil.ReadFile("Forkliftfile")
+	pkg, err := getFileSystemPackage()
 	if err != nil {
-		Log(err, true, 1)
+		Log(err, true, LOG_ERR)
 	}
 
-	pkg := new(flp.Package)
-
-	err = yaml.Unmarshal(Forkliftfile, &pkg)
+	err = runCommands("Build.", pkg.Build, true)
 	if err != nil {
-		Log(err, true, 1)
+		Log(errors.New("Buid Faild. Cleaning up."), false, LOG_WARN)
+		runClean(pkg)
+		Log(err, true, LOG_ERR) //We can die now. :/
 	}
 
 	//TODO: Complain about extrenious or missing files.
 	//Add support for .forkliftignore
 
-	for _, cmd := range pkg.Build {
-		cmd := exec.Command("sh", "-c", cmd)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		if err != nil && err != io.EOF {
-			Log(err, true, 1)
-		}
-	}
-
 	checksum, err := flp.Build(pkg)
 	if err != nil {
-		Log(err, true, 1)
+		Log(err, true, LOG_ERR)
 	}
 
-	fmt.Printf("sha256sum: %s", checksum)
+	Log(fmt.Errorf("sha256sum: %s", checksum), false, LOG_INFO)
+	runClean(pkg)
 }

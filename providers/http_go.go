@@ -59,7 +59,10 @@ func (p *GO) Update() error {
 		return err
 	}
 
-	f := func(v string, o *string) bool { *o = v; return reg.MatchString(v) }
+	f := func(v string, o *string) bool {
+		*o = strings.TrimRight(v, "/")
+		return reg.MatchString(v)
+	}
 	p.index.Packages, err = util.GetHTMLElements(p.location.String(), "a", "href", f)
 
 	if err != nil {
@@ -142,7 +145,7 @@ func (p *GO) Fetch(name string, ranges string) (io.Reader, error) {
 	}
 
 	u := *p.location
-	u.Path = path.Join(u.Path, flp.Tag(name, latest))
+	u.Path = path.Join(u.Path, name, flp.Tag(name, latest))
 
 	res, err := http.Get(u.String())
 	if err != nil {
