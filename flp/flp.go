@@ -21,7 +21,7 @@ func Tag(name string, version *semver.Version) string {
 	if path.Ext(name) == ".flp" {
 		return name
 	}
-	return fmt.Sprintf("%s-%s.flp", name, version.String(true))
+	return fmt.Sprintf("%s-%s.flp", name, version.StringWithMeta())
 }
 
 type File struct {

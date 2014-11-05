@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	List["local"] = &Local{}
+	//List["local"] = &Local{}
 }
 
 //				 Name     Versions
@@ -35,40 +35,6 @@ func (p *Local) SetLocation(location string) error {
 
 func (p Local) Location() string {
 	return "Not Location Support."
-}
-
-func (p *Local) Update() error {
-
-	//No update support.
-	return nil
-	//
-	//	var err error
-	//	r := "^[a-zA-Z0-9].*/$"
-	//
-	//	if p.f != "" && p.f != "*" {
-	//		r = p.f + ".*/"
-	//	}
-	//
-	//	reg, err := regexp.Compile(r)
-	//	if err != nil {
-	//		return err
-	//	}
-	//
-	//	f := func(v string, o *string) bool {
-	//		*o = strings.TrimRight(v, "/")
-	//		return reg.MatchString(v)
-	//	}
-	//	p.index.Packages, err = util.GetHTMLElements(p.location.String(), "a", "href", f)
-	//
-	//	if err != nil {
-	//		return err
-	//	}
-	//
-	//	return nil
-}
-
-func (p *Local) SetFilter(f string) {
-	p.f = f
 }
 
 func (p *Local) Packages() []string {

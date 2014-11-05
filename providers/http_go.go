@@ -12,12 +12,11 @@ import (
 	"strings"
 
 	"github.com/forklift/fl/flp"
-	"github.com/forklift/fl/util"
 	"github.com/omeid/semver"
 )
 
 func init() {
-	List["go"] = &GO{}
+	//	List["go"] = &GO{}
 }
 
 //				 Name     Versions
@@ -59,11 +58,12 @@ func (p *GO) Update() error {
 		return err
 	}
 
-	f := func(v string, o *string) bool {
-		*o = strings.TrimRight(v, "/")
-		return reg.MatchString(v)
+	f := func(v []byte, o *string) bool {
+		s := string(v)
+		*o = strings.TrimRight(s, "/")
+		return reg.MatchString(s)
 	}
-	p.index.Packages, err = util.GetHTMLElements(p.location.String(), "a", "href", f)
+	p.index.Packages, err = getXML(p.location.String(), "a", f)
 
 	if err != nil {
 		return err
@@ -97,18 +97,17 @@ func (p *GO) Versions(filter string) ([]string, error) {
 		return versions, err
 	}
 
-	f := func(v string, o *string) bool {
-		v = strings.TrimRight(v, "\\.flp")
-		_, err := semver.Parts(v)
+	f := func(v []byte, o *string) bool {
+		s := string(v)
+		s = strings.TrimRight(s, "\\.flp")
+		_, err := semver.Parts(s)
 		if err != nil {
 			return false
 		}
-
-		//*o = strings.TrimLeft(v, p.f+"-")
-		*o = v //For easier copypasta and scripting.
-		return reg.MatchString(v)
+		*o = s
+		return reg.MatchString(s)
 	}
-	versions, err = util.GetHTMLElements(u.String(), "a", "href", f)
+	versions, err = getXML(u.String(), "a", f)
 
 	if err != nil {
 		return versions, err
@@ -119,8 +118,7 @@ func (p *GO) Versions(filter string) ([]string, error) {
 
 func (p *GO) Get(name string, ranges string) (*semver.Version, error) {
 
-	p.SetFilter(name)
-	versions, err := p.Versions()
+	versions, err := p.Versions(name)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +131,7 @@ func (p *GO) Get(name string, ranges string) (*semver.Version, error) {
 	return c.Latest(ranges)
 }
 
-func (p *GO) Fetch(name string, ranges string) (io.Reader, error) {
+func (p *GO) Fetch(ver semver.Version) (io.Reader, error) {
 
 	if p.location == nil {
 		return nil, errors.New("Package not found.")
