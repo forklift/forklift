@@ -4,12 +4,16 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
+	"github.com/forklift/fl/engine"
 	"github.com/forklift/fl/providers"
 )
 
 //Behold the globals.
 var (
+	Log       engine.Logger
+	Engine    engine.Engine
 	repo      providers.Provider
 	templates = new(template.Template)
 )
@@ -46,10 +50,12 @@ func main() {
 
 	app.Before = func(c *cli.Context) error {
 
+		Log = logrus.New()
+		Engine = engine.Engine{Log}
+
 		provider, err := providers.NewProvider(c.String("provider"))
 		if err != nil {
-			Log(err, true, LOG_ERR)
-			return err
+			Log.Fatal(err)
 		}
 		repo = *provider
 		return nil

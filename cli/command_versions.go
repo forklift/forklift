@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"sort"
 
 	"github.com/codegangsta/cli"
 )
@@ -29,19 +28,18 @@ func versionsAction(c *cli.Context) {
 		return
 	}
 
-	repo.SetFilter(arg)
 	err := repo.Update()
 	if err != nil {
-		Log(err, true, LOG_ERR)
+		Log.Fatal(err)
 	}
 
 	templates.New("packageversions").Parse(packageVersionsTemplate)
 
 	//TODO: Do we need this? does http.FileServer sort? check source.
 	// Perhaps we need a semver.Sort interface.
-	sort.Strings(repo.Packages())
+	//sort.Strings(repo.Packages())
 	err = templates.ExecuteTemplate(os.Stdout, "packageversions", repo)
 	if err != nil {
-		Log(err, true, LOG_ERR)
+		Log.Fatal(err)
 	}
 }

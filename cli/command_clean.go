@@ -1,8 +1,6 @@
 package main
 
 import (
-	"errors"
-
 	"github.com/codegangsta/cli"
 	"github.com/forklift/fl/flp"
 )
@@ -15,17 +13,9 @@ var clean = cli.Command{
 
 func cleanAction(c *cli.Context) {
 
-	pkg, err := getFileSystemPackage()
+	pkg, err := flp.ReadPackage()
 	if err != nil {
-		Log(err, true, LOG_ERR)
+		Log.Fatal(err)
 	}
 
-	runClean(pkg)
-}
-
-func runClean(pkg *flp.Package) {
-	err := runCommands("Cleaning.", pkg.Clean, true)
-	if err != nil {
-		Log(errors.New("Cleaning faild."), false, LOG_ERR)
-	}
 }

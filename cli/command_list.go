@@ -36,17 +36,15 @@ func listAction(c *cli.Context) {
 		arg = "*"
 	}
 
-	repo.SetFilter(arg)
-
 	err := repo.Update()
 	if err != nil {
-		Log(err, true, LOG_ERR)
+		Log.Fatal(err)
 	}
 
 	templates.New("packageslist").Parse(packagesListTemplate)
 
 	err = templates.ExecuteTemplate(os.Stdout, "packageslist", repo)
 	if err != nil {
-		Log(err, true, LOG_ERR)
+		Log.Fatal(err)
 	}
 }

@@ -1,6 +1,10 @@
 package main
 
-import "github.com/codegangsta/cli"
+import (
+	"log"
+
+	"github.com/codegangsta/cli"
+)
 
 var install = cli.Command{
 	Name:   "install",
@@ -25,22 +29,23 @@ func installAction(c *cli.Context) {
 	}
 	err := repo.Update()
 	if err != nil {
-		Log(err, true, LOG_ERR)
+		log.Fatal(err)
 	}
 
 	nv, err := NewNameVersion(arg)
 	if err != nil {
-		Log(err, true, LOG_ERR)
+		Log.Fatal(err)
 	}
 
-	pack, err := repo.Fetch(nv.Name, nv.Version)
+	pack, err := repo.Fetch(nv)
 	if err != nil {
-		Log(err, true, LOG_ERR)
+		Log.Fatal(err)
 	}
 
 	root := c.String("root")
-	err := engine.Install(pack, root)
+	err = Engine.Install(pack, root)
 	if err != nil {
-		engine.Clean()
+		//	Engine.Clean(true)
+		//Maybe uninstall here?
 	}
 }
