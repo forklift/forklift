@@ -13,7 +13,7 @@ func bouncer(dir string) (func() error, error) {
 	//The infamous nope function, it does nothing.
 	//We return the nope on failur so it can be called
 	// on Defer regardless of the error status.
-	nope := func() { return nil }
+	nope := func() error { return nil }
 
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -34,7 +34,7 @@ func bouncer(dir string) (func() error, error) {
 	return bounc, err
 }
 
-func runCommands(step string, cmdlist []string, returnAtFailur bool) error {
+func run(step string, cmdlist []string, returnAtFailur bool) error {
 
 	Log.Info("Starting: ", step)
 
@@ -43,7 +43,7 @@ func runCommands(step string, cmdlist []string, returnAtFailur bool) error {
 		cmd := exec.Command("sh", "-c", cmd)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		err = cmd.Run()
+		err := cmd.Run()
 		if err != nil && err != io.EOF {
 			Log.Warn(err)
 			if returnAtFailur {

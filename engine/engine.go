@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"errors"
 	"io"
 	"syscall"
 
@@ -27,7 +26,7 @@ func (e Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
 		return nil, err
 	}
 
-	err = runCommands("Build.", pkg.Build, true)
+	err = run("Build.", pkg.Build, true)
 	if err != nil {
 		Log.Error(err)
 		return nil, err
@@ -42,22 +41,23 @@ func (e Engine) Clean(dir string, storage io.WriteCloser) error {
 	bounce, err := bouncer(dir)
 	defer bounce()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	pkg, err := flp.ReadPackage()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	//It runCommands with false never returns anything,
 	// All the errors are logged directly.
-	return runCommands("Cleaning.", pkg.Clean, false)
+	return run("Cleaning.", pkg.Clean, false)
 }
 
 // Install
 func (e Engine) Install(pack io.Reader, root string) error {
 
+	var err error
 	if root != "/" {
 		//Not using the default root, so we need to chroot (Change root).
 		//This requires root user or sudo access.
@@ -83,11 +83,11 @@ func (e Engine) Install(pack io.Reader, root string) error {
 		return err
 	}
 
-	err = runCommands("Post Install", pkg.Install, true)
+	err = run("Post Install", pkg.Install, true)
 	if err != nil {
-		Log(errors.New("Post install Faild. Uninstalling."), false, LOG_WARN)
-		runClean(pkg)
-		Log(err, true, LOG_ERR) //We can die now. :/
+		Log.Error(err)
+		//Log.Warn("Post install Faild. Uninstalling.")
+		//e.Uninstall(pkg)
 	}
 
 	Log.Print("Package installed successfuly.", pkg.Version)
