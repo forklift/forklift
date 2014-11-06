@@ -34,18 +34,18 @@ func bouncer(dir string) (func() error, error) {
 	return bounc, err
 }
 
-func run(step string, cmdlist []string, returnAtFailur bool) error {
+func run(log Logger, step string, cmdlist []string, returnAtFailur bool) error {
 
-	Log.Info("Starting: ", step)
+	log.Info("Starting: ", step)
 
 	for _, cmd := range cmdlist {
-		Log.Info("Starting: ", cmd)
+		log.Info("Starting: ", cmd)
 		cmd := exec.Command("sh", "-c", cmd)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil && err != io.EOF {
-			Log.Warn(err)
+			log.Warn(err)
 			if returnAtFailur {
 				return err
 			}

@@ -7,13 +7,12 @@ import (
 	"github.com/forklift/fl/flp"
 )
 
-var Log Logger
-
 type Engine struct {
+	log Logger
 }
 
 //Build
-func (e Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
+func (e *Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
 
 	bounce, err := bouncer(dir)
 	defer bounce()
@@ -26,9 +25,9 @@ func (e Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
 		return nil, err
 	}
 
-	err = run("Build.", pkg.Build, true)
+	err = run(e.log, "Build.", pkg.Build, true)
 	if err != nil {
-		Log.Error(err)
+		e.log.Error(err)
 		return nil, err
 	}
 	return flp.Pack(pkg, storage)
@@ -36,7 +35,7 @@ func (e Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
 
 //Clean
 
-func (e Engine) Clean(dir string, storage io.WriteCloser) error {
+func (e *Engine) Clean(dir string, storage io.WriteCloser) error {
 
 	bounce, err := bouncer(dir)
 	defer bounce()
@@ -51,11 +50,11 @@ func (e Engine) Clean(dir string, storage io.WriteCloser) error {
 
 	//It runCommands with false never returns anything,
 	// All the errors are logged directly.
-	return run("Cleaning.", pkg.Clean, false)
+	return run(e.log, "Cleaning.", pkg.Clean, false)
 }
 
 // Install
-func (e Engine) Install(pack io.Reader, root string) error {
+func (e *Engine) Install(pack io.Reader, root string) error {
 
 	var err error
 	if root != "/" {
@@ -73,23 +72,23 @@ func (e Engine) Install(pack io.Reader, root string) error {
 	}
 
 	if err != nil {
-		Log.Error(err)
+		e.log.Error(err)
 		return err
 	}
 
 	pkg, err := flp.Unpack(pack, root, false)
 	if err != nil {
-		Log.Error(err)
+		e.log.Error(err)
 		return err
 	}
 
-	err = run("Post Install", pkg.Install, true)
+	err = run(e.log, "Post Install", pkg.Install, true)
 	if err != nil {
-		Log.Error(err)
-		//Log.Warn("Post install Faild. Uninstalling.")
+		e.log.Error(err)
+		//e.log.Warn("Post install Faild. Uninstalling.")
 		//e.Uninstall(pkg)
 	}
 
-	Log.Print("Package installed successfuly.", pkg.Version)
+	e.log.Print("Package installed successfuly.", pkg.Version)
 	return nil
 }

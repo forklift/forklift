@@ -16,7 +16,7 @@ var build = cli.Command{
 
 func buildAction(c *cli.Context) {
 
-	pkg, err := getFileSystemPackage()
+	pkg, err := flp.ReadPackage()
 	if err != nil {
 		Log(err, true, LOG_ERR)
 	}
