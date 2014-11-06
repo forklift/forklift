@@ -45,13 +45,13 @@ type Provider interface {
 	//Appropriate message. (i.e: "Local" Provider does not support location.")
 	Location() string
 
-	//Used for remote providers to check network
+	//Used for remote providers to update their repository list.
 	//Providers MUST attempt to reconnect and only return an error if connection
 	//fails after reasonable number of retrys.
-	Ping() error
+	Update() error
 
-	//List all packages, accets a filter.
-	Packages(string) []string
+	//List all packages, accepts a filter.
+	Packages(string) ([]string, error)
 
 	//List all version of a package.
 	Versions(string) ([]string, error)
@@ -60,7 +60,7 @@ type Provider interface {
 	Fetch(*semver.Version) (io.Reader, error)
 
 	// Provides the location for the source of a specific version.
-	// The location must be a location on the local file system, preferably under /tmp/ when applies.
-	// Thus, the provider may need to fetch, and extract if neccessary.
+	// The location must be a location on the local file system, preferably under /tmp/ when possible.
+	// It is the responsiblity of the provider to fetch and extract the source.
 	Source(*semver.Version) (string, error)
 }

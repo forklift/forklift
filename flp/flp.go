@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"path"
 
 	"github.com/omeid/semver"
 	"gopkg.in/yaml.v2"
@@ -17,11 +16,8 @@ var (
 	ErrMissingForkliftfile = errors.New("No Forkliftfile")
 )
 
-func Tag(name string, version *semver.Version) string {
-	if path.Ext(name) == ".flp" {
-		return name
-	}
-	return fmt.Sprintf("%s-%s.flp", name, version.StringWithMeta())
+func Tag(version *semver.Version) string {
+	return fmt.Sprintf("%s-%s.flp", version.Product, version.StringWithMeta())
 }
 
 type File struct {

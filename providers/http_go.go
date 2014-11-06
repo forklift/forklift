@@ -1,14 +1,13 @@
 package providers
 
 import (
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
-	"regexp"
+	"path/filepath"
 	"strings"
 
 	"github.com/forklift/fl/flp"
@@ -16,18 +15,13 @@ import (
 )
 
 func init() {
-	//	List["go"] = &GO{}
+	List["go"] = &GO{}
 }
 
 //				 Name     Versions
 type GO struct {
 	location *url.URL
-	f        string //The filter. TODO: Remove it.
-
-	index struct {
-		XMLNAME  xml.Name `xml:"pre"`
-		Packages []string `xml:"a"`
-	}
+	packages []string
 }
 
 func (p *GO) SetLocation(location string) error {
@@ -45,39 +39,38 @@ func (p *GO) Update() error {
 	if p.location == nil {
 		return errors.New("Provider unset.")
 	}
-
-	var err error
-	r := "^[a-zA-Z0-9].*/$"
-
-	if p.f != "" && p.f != "*" {
-		r = p.f + ".*/"
-	}
-
-	reg, err := regexp.Compile(r)
-	if err != nil {
-		return err
-	}
-
-	f := func(v []byte, o *string) bool {
-		s := string(v)
-		*o = strings.TrimRight(s, "/")
-		return reg.MatchString(s)
-	}
-	p.index.Packages, err = getXML(p.location.String(), "a", f)
-
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
-func (p *GO) SetFilter(f string) {
-	p.f = f
-}
+func (p *GO) Packages(filter string) ([]string, error) {
 
-func (p *GO) Packages() []string {
-	return p.index.Packages
+	//If no filter or catch all, return it all.
+	if filter == "*" || filter == "" {
+		return p.packages, nil
+	}
+
+	//If there is no globing or filter charchters,
+	//There can be only one matching package.
+	one := strings.IndexAny(filter, "*?[") < 0
+
+	filtered := []string{}
+
+	for _, pkg := range p.packages {
+
+		matched, err := filepath.Match(filter, pkg)
+		if err != nil {
+			return filtered, err
+		}
+		if matched {
+			filtered = append(filtered, pkg)
+
+			if one {
+				break
+			}
+		}
+	}
+
+	return filtered, nil
 }
 
 func (p *GO) Versions(filter string) ([]string, error) {
@@ -92,22 +85,9 @@ func (p *GO) Versions(filter string) ([]string, error) {
 
 	u.Path = path.Join(u.Path, filter) + "/"
 
-	reg, err := regexp.Compile("^" + filter + "(-[0-9].*)?$")
-	if err != nil {
-		return versions, err
-	}
-
-	f := func(v []byte, o *string) bool {
-		s := string(v)
-		s = strings.TrimRight(s, "\\.flp")
-		_, err := semver.Parts(s)
-		if err != nil {
-			return false
-		}
-		*o = s
-		return reg.MatchString(s)
-	}
-	versions, err = getXML(u.String(), "a", f)
+	//versions, err :=  p.Packages(filter)
+	versions = nil
+	var err error
 
 	if err != nil {
 		return versions, err
@@ -131,19 +111,14 @@ func (p *GO) Get(name string, ranges string) (*semver.Version, error) {
 	return c.Latest(ranges)
 }
 
-func (p *GO) Fetch(ver semver.Version) (io.Reader, error) {
+func (p *GO) Fetch(ver *semver.Version) (io.Reader, error) {
 
 	if p.location == nil {
 		return nil, errors.New("Package not found.")
 	}
 
-	latest, err := p.Get(name, ranges)
-	if err != nil {
-		return nil, err
-	}
-
 	u := *p.location
-	u.Path = path.Join(u.Path, name, flp.Tag(name, latest))
+	u.Path = path.Join(u.Path, ver.Product, flp.Tag(ver))
 
 	res, err := http.Get(u.String())
 	if err != nil {
@@ -154,4 +129,8 @@ func (p *GO) Fetch(ver semver.Version) (io.Reader, error) {
 		return nil, fmt.Errorf("%d %s", res.StatusCode, http.StatusText(res.StatusCode))
 	}
 	return res.Body, nil
+}
+
+func (p *GO) Source(ver *semver.Version) (string, error) {
+	return "", nil
 }
