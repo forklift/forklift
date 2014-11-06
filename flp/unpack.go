@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 
 	"gopkg.in/yaml.v2"
@@ -58,7 +59,7 @@ func Unpack(pack io.Reader, root string, MetaOnly bool) (*Package, error) {
 //Helper function for Install.
 func makeNode(meta tar.Header, content io.Reader, root string) error {
 
-	Path := filepath.Join(root, meta.Name)
+	Path := filepath.Join("root", meta.Name)
 
 	if meta.Typeflag == tar.TypeDir {
 		err := os.MkdirAll(Path, os.FileMode(meta.Mode))
@@ -76,7 +77,7 @@ func makeNode(meta tar.Header, content io.Reader, root string) error {
 		return nil
 	}
 
-	file, err := os.Create(Path)
+	file, err := os.Create(path.Join(root, Path))
 	defer file.Close()
 	if err != nil {
 		return err

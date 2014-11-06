@@ -66,17 +66,12 @@ func showAction(c *cli.Context) {
 		Log.Fatal(err)
 	}
 
-	nv, err := NewNameVersion(arg)
+	pack, err := repo.Fetch(ver)
 	if err != nil {
 		Log.Fatal(err)
 	}
 
-	pack, err := repo.Fetch(nv.Name, nv.Version)
-	if err != nil {
-		Log.Fatal(err)
-	}
-
-	pkg, err := flp.Unpack(pack, true)
+	pkg, err := flp.Unpack(pack, "", true)
 	if err != nil {
 		Log.Fatal(err)
 	}
@@ -85,6 +80,6 @@ func showAction(c *cli.Context) {
 
 	err = templates.ExecuteTemplate(os.Stdout, "packageinfo", pkg)
 	if err != nil {
-		Log(err, true, LOG_ERR)
+		Log.Fatal(err)
 	}
 }

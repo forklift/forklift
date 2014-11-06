@@ -13,7 +13,7 @@ import (
 //Behold the globals.
 var (
 	Log       engine.Logger
-	Engine    engine.Engine
+	Engine    *engine.Engine
 	repo      providers.Provider
 	templates = new(template.Template)
 )
@@ -51,7 +51,7 @@ func main() {
 	app.Before = func(c *cli.Context) error {
 
 		Log = logrus.New()
-		Engine = engine.Engine{Log}
+		Engine = engine.New(Log)
 
 		provider, err := providers.NewProvider(c.String("provider"))
 		if err != nil {

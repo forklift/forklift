@@ -7,6 +7,10 @@ import (
 	"github.com/forklift/fl/flp"
 )
 
+func New(log Logger) *Engine {
+	return &Engine{log: log}
+}
+
 type Engine struct {
 	log Logger
 }
