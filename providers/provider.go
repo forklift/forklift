@@ -11,39 +11,58 @@ import (
 var List = map[string]Provider{}
 
 var (
-	ErrorPackageProviderMissing = errors.New("Package Provider Missing.")
-	ErrorPackageProviderInvlaid = errors.New("Package Provider Invalid.")
-	ErrorNoSuchProvider         = errors.New("No Such Provider.")
+	ErrorNoSuchProvider = errors.New("[Provider] No Such Provider.")
+
+	ErrorLabelEmpty   = errors.New("[Provider] The Label is empty.")
+	ErrorLabelInvalid = errors.New("[Provider] Invalid Label. Require 'provider:location package'")
 )
 
-func NewProvider(pp string) (*Provider, error) {
-	if pp == "" {
-		return nil, ErrorPackageProviderMissing
+type Label struct {
+	Location string
+	Version  *semver.Version
+
+	//If it is not the exact version requested for.
+	Alt bool
+}
+
+func Provide(labelstring string) (Provider, *Label, error) {
+	if labelstring == "" {
+		return nil, nil, ErrorLabelEmpty
 	}
 
-	p := strings.SplitN(pp, ":", 2)
-	if len(p) < 2 {
-		return nil, ErrorPackageProviderInvlaid
+	var (
+		provider Provider
+		parts    []string
+	)
+
+	first := labelstring[0]
+	if first == '.' || first == '/' {
+		provider = &Local{}
+	} else {
+
+		parts = strings.SplitN(labelstring, ":", 2)
+		if len(parts) < 2 {
+			return nil, nil, ErrorLabelInvalid
+		}
+
+		var ok bool
+		if provider, ok = List[parts[0]]; !ok {
+			return nil, nil, ErrorNoSuchProvider
+		}
+
 	}
 
-	if provider, ok := List[p[0]]; ok {
-		err := provider.SetLocation(p[1])
-		return &provider, err
-	}
+	label, err := provider.Parse(parts[1])
+	return provider, label, err
 
-	return nil, ErrorNoSuchProvider
 }
 
 type Provider interface {
 
-	//If applies, this funciton should set the address of provider
-	//Return error on invalid format only, if provider doesn't requires
-	//an address or it can't be set, return nil.
-	SetLocation(string) error
-
-	//Return the location of provier, if it doesn't applies, return an
-	//Appropriate message. (i.e: "Local" Provider does not support location.")
-	Location() string
+	//This method parses a Label
+	//into Locatoin and Version, returns an error if
+	//invalid Label.
+	Parse(string) (*Label, error)
 
 	//Used for remote providers to update their repository list.
 	//Providers MUST attempt to reconnect and only return an error if connection
@@ -53,14 +72,14 @@ type Provider interface {
 	//List all packages, accepts a filter.
 	Packages(string) ([]string, error)
 
-	//List all version of a package.
+	//List all version of a package, accepts a product name.
 	Versions(string) ([]string, error)
 
 	//Fetches a specific package.
-	Fetch(*semver.Version) (io.Reader, error)
+	Fetch(*Label) (io.Reader, error)
 
 	// Provides the location for the source of a specific version.
 	// The location must be a location on the local file system, preferably under /tmp/ when possible.
-	// It is the responsiblity of the provider to fetch and extract the source.
-	Source(*semver.Version) (string, error)
+	// It is the stevenhong: responsiblity of the provider to fetch and extract the source.
+	Source(*Label) (string, error)
 }

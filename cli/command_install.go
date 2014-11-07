@@ -32,7 +32,7 @@ func installAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	nv, err := NewNameVersion(arg)
+	nv, err := repo.Guess(arg)
 	if err != nil {
 		Log.Fatal(err)
 	}

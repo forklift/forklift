@@ -6,7 +6,6 @@ import (
 	"path"
 
 	"github.com/forklift/fl/flp"
-	"github.com/omeid/semver"
 )
 
 func init() {
@@ -18,13 +17,8 @@ type Local struct {
 	location string //file system path.
 }
 
-func (p *Local) SetLocation(location string) error {
-	p.location = location
-	return nil
-}
-
-func (p Local) Location() string {
-	return p.location
+func (p *Local) Parse(label string) (*Label, error) {
+	return nil, nil
 }
 
 func (p *Local) Update() error {
@@ -41,10 +35,10 @@ func (p *Local) Versions(product string) ([]string, error) {
 	return versions, nil
 }
 
-func (p *Local) Fetch(ver *semver.Version) (io.Reader, error) {
-	return os.Open(path.Join(p.location, flp.Tag(ver)))
+func (p *Local) Fetch(l *Label) (io.Reader, error) {
+	return os.Open(path.Join(l.Location, flp.Tag(l.Version)))
 }
 
-func (p *Local) Source(ver *semver.Version) (string, error) {
+func (p *Local) Source(l *Label) (string, error) {
 	return "", nil
 }

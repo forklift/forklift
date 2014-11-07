@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/forklift/fl/flp"
-	"github.com/omeid/semver"
 )
 
 func init() {
@@ -40,6 +39,10 @@ func (p *GO) Update() error {
 		return errors.New("Provider unset.")
 	}
 	return nil
+}
+
+func (p *GO) Parse(label string) (*Label, error) {
+	return nil, nil
 }
 
 func (p *GO) Packages(filter string) ([]string, error) {
@@ -96,31 +99,19 @@ func (p *GO) Versions(filter string) ([]string, error) {
 	return versions, nil
 }
 
-func (p *GO) Get(name string, ranges string) (*semver.Version, error) {
+func (p *GO) Fetch(l *Label) (io.Reader, error) {
 
-	versions, err := p.Versions(name)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := semver.NewCollection(versions)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.Latest(ranges)
-}
-
-func (p *GO) Fetch(ver *semver.Version) (io.Reader, error) {
-
-	if p.location == nil {
+	if l.Location == "" {
 		return nil, errors.New("Package not found.")
 	}
 
-	u := *p.location
-	u.Path = path.Join(u.Path, ver.Product, flp.Tag(ver))
+	if l.Version == nil || l.Version.Product == "" {
+		return nil, nil // ErrorMissingProduct
+	}
 
-	res, err := http.Get(u.String())
+	location := path.Join(l.Location, l.Version.Product, flp.Tag(l.Version))
+
+	res, err := http.Get(location)
 	if err != nil {
 		return nil, err
 	}
@@ -131,6 +122,6 @@ func (p *GO) Fetch(ver *semver.Version) (io.Reader, error) {
 	return res.Body, nil
 }
 
-func (p *GO) Source(ver *semver.Version) (string, error) {
+func (p *GO) Source(l *Label) (string, error) {
 	return "", nil
 }
