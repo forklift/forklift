@@ -34,9 +34,7 @@ func bouncer(dir string) (func() error, error) {
 	return bounc, err
 }
 
-func run(log Logger, step string, cmdlist []string, returnAtFailur bool) error {
-
-	log.Info("Starting: ", step)
+func run(log Logger, cmdlist []string, returnAtFailur bool) error {
 
 	for _, cmd := range cmdlist {
 		log.Info("Starting: ", cmd)

@@ -29,7 +29,8 @@ func (e *Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
 		return nil, err
 	}
 
-	err = run(e.log, "Build.", pkg.Build, true)
+	e.log.Info("Starting: build...")
+	err = run(e.log, pkg.Build, true)
 	if err != nil {
 		e.log.Error(err)
 		return nil, err
@@ -52,9 +53,10 @@ func (e *Engine) Clean(dir string, storage io.WriteCloser) error {
 		return err
 	}
 
-	//It runCommands with false never returns anything,
+	//"run" with false never returns anything,
 	// All the errors are logged directly.
-	return run(e.log, "Cleaning.", pkg.Clean, false)
+	e.log.Info("Starting: Cleaning..")
+	return run(e.log, pkg.Clean, false)
 }
 
 // Install
@@ -86,7 +88,8 @@ func (e *Engine) Install(pack io.Reader, root string) error {
 		return err
 	}
 
-	err = run(e.log, "Post Install", pkg.Install, true)
+	e.log.Info("Starting: Post Install..")
+	err = run(e.log, pkg.Install, true)
 	if err != nil {
 		e.log.Error(err)
 		//e.log.Warn("Post install Faild. Uninstalling.")
