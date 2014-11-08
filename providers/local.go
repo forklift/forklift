@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/forklift/fl/flp"
+	"github.com/forklift/forklift/flp"
 	"github.com/omeid/semver"
 )
 

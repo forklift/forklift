@@ -5,8 +5,8 @@ import (
 	"text/template"
 
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl/flp"
-	"github.com/forklift/fl/providers"
+	"github.com/forklift/forklift/flp"
+	"github.com/forklift/forklift/providers"
 )
 
 var show = cli.Command{

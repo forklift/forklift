@@ -26,7 +26,7 @@ func Unpack(pack io.Reader, root string, MetaOnly bool) (*Package, error) {
 	pkg := new(Package)
 	Forkliftfile, err := ioutil.ReadAll(tar)
 	if err != nil {
-		return nil, errors.New("Error reading Forklift file from tar. This should neverh happen. Please open an issue at github.com/forklift/fl/issues")
+		return nil, errors.New("Error reading Forklift file from tar. This should neverh happen. Please open an issue at github.com/forklift/forklift/issues")
 	}
 
 	err = yaml.Unmarshal(Forkliftfile, &pkg)

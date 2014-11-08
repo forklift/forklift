@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl/providers"
+	"github.com/forklift/forklift/providers"
 )
 
 var install = cli.Command{

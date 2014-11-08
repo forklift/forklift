@@ -6,8 +6,8 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl/engine"
-	"github.com/forklift/fl/providers"
+	"github.com/forklift/forklift/engine"
+	"github.com/forklift/forklift/providers"
 )
 
 //Behold the globals.
