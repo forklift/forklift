@@ -14,6 +14,12 @@ var build = cli.Command{
 	Name:   "build",
 	Usage:  "Build a Forklift Package from an florklift.json",
 	Action: buildAction,
+	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name:  "dirty, d",
+			Usage: "Don't clean after build.",
+		},
+	},
 }
 
 func buildAction(c *cli.Context) {
@@ -55,4 +61,13 @@ func buildAction(c *cli.Context) {
 	}
 
 	Log.Info(fmt.Sprintf("sha256sum: %x ", checksum))
+
+	if !c.Bool("dirty") {
+		err = Engine.Clean(location)
+		if err != nil {
+			Log.Error(err)
+			return
+		}
+		Log.Info("Clean succesed.")
+	}
 }

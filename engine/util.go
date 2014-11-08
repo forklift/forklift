@@ -42,7 +42,7 @@ func bouncer(dir string) (func() error, error) {
 func run(log Logger, cmdlist []string, returnAtFailur bool) error {
 
 	for _, cmd := range cmdlist {
-		log.Info("Starting: ", cmd)
+		log.Info("Running: ", cmd)
 		cmd := exec.Command("sh", "-c", cmd)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
