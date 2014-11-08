@@ -36,14 +36,14 @@ func listAction(c *cli.Context) {
 		arg = "*"
 	}
 
-	err := repo.Update()
+	err := Provider.Update()
 	if err != nil {
 		Log.Fatal(err)
 	}
 
 	templates.New("packageslist").Parse(packagesListTemplate)
 
-	err = templates.ExecuteTemplate(os.Stdout, "packageslist", repo)
+	err = templates.ExecuteTemplate(os.Stdout, "packageslist", Provider)
 	if err != nil {
 		Log.Fatal(err)
 	}

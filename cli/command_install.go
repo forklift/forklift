@@ -1,9 +1,8 @@
 package main
 
 import (
-	"log"
-
 	"github.com/codegangsta/cli"
+	"github.com/forklift/fl/providers"
 )
 
 var install = cli.Command{
@@ -27,17 +26,13 @@ func installAction(c *cli.Context) {
 		cli.ShowSubcommandHelp(c)
 		return
 	}
-	err := repo.Update()
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	nv, err := repo.Guess(arg)
+	Provider, label, err := providers.Provide(arg)
 	if err != nil {
 		Log.Fatal(err)
 	}
 
-	pack, err := repo.Fetch(nv)
+	pack, err := Provider.Fetch(label)
 	if err != nil {
 		Log.Fatal(err)
 	}

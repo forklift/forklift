@@ -25,22 +25,24 @@ type Label struct {
 	Alt bool
 }
 
-func Provide(labelstring string) (Provider, *Label, error) {
-	if labelstring == "" {
+func Provide(uri string) (Provider, *Label, error) {
+	if uri == "" {
 		return nil, nil, ErrorLabelEmpty
 	}
 
 	var (
-		provider Provider
-		parts    []string
+		provider    Provider
+		labelstring string
 	)
 
-	first := labelstring[0]
+	first := uri[0]
 	if first == '.' || first == '/' {
 		provider = &Local{}
+		labelstring = uri
+
 	} else {
 
-		parts = strings.SplitN(labelstring, ":", 2)
+		parts := strings.SplitN(uri, ":", 2)
 		if len(parts) < 2 {
 			return nil, nil, ErrorLabelInvalid
 		}
@@ -50,9 +52,11 @@ func Provide(labelstring string) (Provider, *Label, error) {
 			return nil, nil, ErrorNoSuchProvider
 		}
 
+		labelstring = parts[1]
+
 	}
 
-	label, err := provider.Parse(parts[1])
+	label, err := provider.Parse(labelstring)
 	return provider, label, err
 
 }

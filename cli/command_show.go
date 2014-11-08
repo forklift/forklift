@@ -6,6 +6,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/forklift/fl/flp"
+	"github.com/forklift/fl/providers"
 )
 
 var show = cli.Command{
@@ -61,12 +62,10 @@ func showAction(c *cli.Context) {
 		cli.ShowSubcommandHelp(c)
 		return
 	}
-	err := repo.Update()
-	if err != nil {
-		Log.Fatal(err)
-	}
 
-	pack, err := repo.Fetch(ver)
+	provider, label, err := providers.Provide(arg)
+
+	pack, err := provider.Fetch(label)
 	if err != nil {
 		Log.Fatal(err)
 	}

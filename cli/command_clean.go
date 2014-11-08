@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
-	"github.com/forklift/fl/flp"
+	"github.com/forklift/fl/providers"
 )
 
 var clean = cli.Command{
@@ -13,9 +13,28 @@ var clean = cli.Command{
 
 func cleanAction(c *cli.Context) {
 
-	pkg, err := flp.ReadPackage()
+	arg := c.Args().First()
+
+	if arg == "" {
+		cli.ShowSubcommandHelp(c)
+		return
+	}
+
+	provider, label, err := providers.Provide(arg)
 	if err != nil {
 		Log.Fatal(err)
 	}
+
+	location, err := provider.Source(label)
+	if err != nil {
+		Log.Fatal(err)
+	}
+
+	err = Engine.Clean(location)
+	if err != nil {
+		Log.Error(err)
+		return
+	}
+	Log.Info("Clean succesed.")
 
 }

@@ -28,7 +28,7 @@ func versionsAction(c *cli.Context) {
 		return
 	}
 
-	err := repo.Update()
+	err := Provider.Update()
 	if err != nil {
 		Log.Fatal(err)
 	}
@@ -38,7 +38,7 @@ func versionsAction(c *cli.Context) {
 	//TODO: Do we need this? does http.FileServer sort? check source.
 	// Perhaps we need a semver.Sort interface.
 	//sort.Strings(repo.Packages())
-	err = templates.ExecuteTemplate(os.Stdout, "packageversions", repo)
+	err = templates.ExecuteTemplate(os.Stdout, "packageversions", Provider)
 	if err != nil {
 		Log.Fatal(err)
 	}

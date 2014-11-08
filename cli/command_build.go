@@ -1,6 +1,14 @@
 package main
 
-import "github.com/codegangsta/cli"
+import (
+	"fmt"
+	"os"
+	"path"
+
+	"github.com/codegangsta/cli"
+	"github.com/forklift/fl/flp"
+	"github.com/forklift/fl/providers"
+)
 
 var build = cli.Command{
 	Name:   "build",
@@ -10,27 +18,41 @@ var build = cli.Command{
 
 func buildAction(c *cli.Context) {
 
-	/*
-		pkg, err := flp.ReadPackage()
+	arg := c.Args().First()
+
+	if arg == "" {
+		cli.ShowSubcommandHelp(c)
+		return
+	}
+
+	provider, label, err := providers.Provide(arg)
+	if err != nil {
+		Log.Fatal(err)
+	}
+
+	location, err := provider.Source(label)
+	if err != nil {
+		Log.Fatal(err)
+	}
+
+	pkg := path.Join(location, flp.Tag(label.Version))
+	//Start creating the package file.
+	storage, err := os.Create(pkg)
+	if err != nil {
+		Log.Error(err)
+		return
+	}
+	defer func() {
 		if err != nil {
-			log.Fatal(err)
+			os.Remove(pkg)
 		}
-			err = runCommands("Build.", pkg.Build, true)
-			if err != nil {
-				Log(errors.New("Buid Faild. Cleaning up."), false, LOG_WARN)
-				runClean(pkg)
-				log.Fatal(err)
-			}
+	}()
 
-			//TODO: Complain about extrenious or missing files.
-			//Add support for .forkliftignore
+	checksum, err := Engine.Build(location, storage)
+	if err != nil {
+		Log.Error(err)
+		return
+	}
 
-			checksum, err := flp.Build(pkg)
-			if err != nil {
-				Log(err, true, LOG_ERR)
-			}
-
-			Log(fmt.Errorf("sha256sum: %s", checksum), false, LOG_INFO)
-			runClean(pkg)
-	*/
+	Log.Info(fmt.Sprintf("sha256sum: %x ", checksum))
 }

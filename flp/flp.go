@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"path"
 
 	"github.com/omeid/semver"
 	"gopkg.in/yaml.v2"
@@ -60,8 +61,8 @@ func NewPackage(Forkliftfile []byte) (*Package, error) {
 	return pkg, yaml.Unmarshal(Forkliftfile, &pkg)
 }
 
-func ReadPackage() (*Package, error) {
-	Forkliftfile, err := ioutil.ReadFile("Forkliftfile")
+func ReadPackage(location string) (*Package, error) {
+	Forkliftfile, err := ioutil.ReadFile(path.Join(location, "Forkliftfile"))
 	if err != nil {
 		return nil, err
 	}

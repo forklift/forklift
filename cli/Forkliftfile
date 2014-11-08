@@ -1,7 +1,7 @@
 # vim: filetype=yaml
 
 name: forklift
-version: 0.0.1-alpha1
+version: 0.0.1-alpha.1
 description: The practical package manger.
 
 keywrods: [fl,build,package,package manger,yum,apt, install]
@@ -29,7 +29,7 @@ build-dependencies:
 # on build system.
 build:
   - mkdir -p root/bin root/etc/forklift/installed
-  - go build -o root/bin/fl xgithub.com/forklift/fl/
+  - go build -o root/bin/fl github.com/forklift/fl/cli
 
 # This section is run after building the package, whatever 
 # the build faild or successed, so write your clean commands

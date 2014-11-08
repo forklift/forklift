@@ -15,6 +15,11 @@ func bouncer(dir string) (func() error, error) {
 	// on Defer regardless of the error status.
 	nope := func() error { return nil }
 
+	//if there is no dir or it is current directory, no need to Chdir or bounc.
+	if dir == "." || dir == "./" || dir == "" {
+		return nope, nil
+	}
+
 	pwd, err := os.Getwd()
 	if err != nil {
 		//Couldn't even get the current working directory. No bounc required.

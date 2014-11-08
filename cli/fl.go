@@ -12,9 +12,10 @@ import (
 
 //Behold the globals.
 var (
-	Log       engine.Logger
-	Engine    *engine.Engine
-	repo      providers.Provider
+	Log      engine.Logger
+	Engine   *engine.Engine
+	Provider providers.Provider
+
 	templates = new(template.Template)
 )
 
@@ -53,11 +54,8 @@ func main() {
 		Log = logrus.New()
 		Engine = engine.New(Log)
 
-		provider, err := providers.NewProvider(c.String("provider"))
-		if err != nil {
-			Log.Fatal(err)
-		}
-		repo = *provider
+		//TODO: short syntax for default provider! :/location/version.v32.32
+		//provider, err := providers.NewProvider(c.String("provider"))
 		return nil
 	}
 	app.Run(os.Args)

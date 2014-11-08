@@ -6,6 +6,7 @@ import (
 	"path"
 
 	"github.com/forklift/fl/flp"
+	"github.com/omeid/semver"
 )
 
 func init() {
@@ -13,12 +14,21 @@ func init() {
 }
 
 //				 Name     Versions
-type Local struct {
-	location string //file system path.
-}
+type Local struct{}
 
 func (p *Local) Parse(label string) (*Label, error) {
-	return nil, nil
+
+	pkg, err := flp.ReadPackage(label)
+	if err != nil {
+		return nil, err
+	}
+
+	ver, err := semver.NewVersion(pkg.Name + "-" + pkg.Version)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Label{label, ver, false}, nil
 }
 
 func (p *Local) Update() error {

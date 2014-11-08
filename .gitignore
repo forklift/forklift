@@ -26,3 +26,9 @@ test-db
 
 # vim temp files.
 *.swp
+
+
+# cli
+./cli/root
+./cli/cli
+./cli/fl

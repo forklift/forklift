@@ -18,13 +18,13 @@ type Engine struct {
 //Build
 func (e *Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
 
-	bounce, err := bouncer(dir)
-	defer bounce()
+	pkg, err := flp.ReadPackage(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	pkg, err := flp.ReadPackage()
+	bounce, err := bouncer(dir)
+	defer bounce()
 	if err != nil {
 		return nil, err
 	}
@@ -40,15 +40,15 @@ func (e *Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
 
 //Clean
 
-func (e *Engine) Clean(dir string, storage io.WriteCloser) error {
+func (e *Engine) Clean(dir string) error {
 
-	bounce, err := bouncer(dir)
-	defer bounce()
+	pkg, err := flp.ReadPackage(dir)
 	if err != nil {
 		return err
 	}
 
-	pkg, err := flp.ReadPackage()
+	bounce, err := bouncer(dir)
+	defer bounce()
 	if err != nil {
 		return err
 	}
