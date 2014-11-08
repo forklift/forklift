@@ -1,9 +1,11 @@
 package providers
 
 import (
+	"errors"
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/forklift/forklift/flp"
 	"github.com/omeid/semver"
@@ -16,26 +18,42 @@ func init() {
 //				 Name     Versions
 type Local struct{}
 
-func (p *Local) Parse(label string) (*Label, error) {
+func (p *Local) Parse(labelstring string) (*Label, error) {
 
-	pkg, err := flp.ReadPackage(label)
-	if err != nil {
-		return nil, err
+	Label := &Label{}
+	var err error
+
+	if path.Ext(labelstring) == ".flp" {
+		Label.Location = path.Dir(labelstring)
+		ver := strings.TrimRight(path.Base(labelstring), path.Ext(labelstring))
+		Label.Version, err = semver.NewVersion(ver)
+
+		if err != nil {
+			return Label, err
+		}
+	} else {
+
+		Label.Location = labelstring
+
+		pkg, err := flp.ReadPackage(labelstring)
+		if err != nil {
+			return nil, err
+		}
+
+		Label.Version, err = semver.NewVersion(pkg.Name + "-" + pkg.Version)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	ver, err := semver.NewVersion(pkg.Name + "-" + pkg.Version)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Label{label, ver, false}, nil
+	return Label, nil
 }
 
 func (p *Local) Update() error {
 	return nil //Error provider Local doesn't support update?
 }
 func (p *Local) Packages(filter string) ([]string, error) {
-	return nil, nil
+	return nil, errors.New("Provider `Local` doesn't support Package listing.")
 }
 
 func (p *Local) Versions(product string) ([]string, error) {

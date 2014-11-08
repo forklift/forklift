@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"text/template"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
@@ -15,8 +14,6 @@ var (
 	Log      engine.Logger
 	Engine   *engine.Engine
 	Provider providers.Provider
-
-	templates = new(template.Template)
 )
 
 func main() {

@@ -18,7 +18,7 @@ var show = cli.Command{
 //Perhaps these can be arranged in more appropriate groups?
 var packageInfoTempate = `NAME               {{.Name}}
 VERSION            {{ .Version }} 
-DESCRIPTION        {{.Description}}
+DESCRIPTION        {{ .Description}}
 LICENSE            {{ .License  }} 
 KEYWRODS           {{ .Keywrods }} 
 
@@ -65,6 +65,10 @@ func showAction(c *cli.Context) {
 
 	provider, label, err := providers.Provide(arg)
 
+	if err != nil {
+		Log.Fatal(err)
+	}
+
 	pack, err := provider.Fetch(label)
 	if err != nil {
 		Log.Fatal(err)
@@ -75,9 +79,7 @@ func showAction(c *cli.Context) {
 		Log.Fatal(err)
 	}
 
-	template.Must(templates.New("packageinfo").Parse(packageInfoTempate))
-
-	err = templates.ExecuteTemplate(os.Stdout, "packageinfo", pkg)
+	err = template.Must(template.New("packagesinfo").Parse(packageInfoTempate)).Execute(os.Stdout, pkg)
 	if err != nil {
 		Log.Fatal(err)
 	}

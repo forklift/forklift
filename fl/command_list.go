@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"text/template"
 
 	"github.com/codegangsta/cli"
 )
@@ -41,9 +42,7 @@ func listAction(c *cli.Context) {
 		Log.Fatal(err)
 	}
 
-	templates.New("packageslist").Parse(packagesListTemplate)
-
-	err = templates.ExecuteTemplate(os.Stdout, "packageslist", Provider)
+	err = template.Must(template.New("packageslist").Parse(packagesListTemplate)).Execute(os.Stdout, Provider)
 	if err != nil {
 		Log.Fatal(err)
 	}

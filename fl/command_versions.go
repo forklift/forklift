@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"os"
 
 	"github.com/codegangsta/cli"
@@ -33,12 +34,7 @@ func versionsAction(c *cli.Context) {
 		Log.Fatal(err)
 	}
 
-	templates.New("packageversions").Parse(packageVersionsTemplate)
-
-	//TODO: Do we need this? does http.FileServer sort? check source.
-	// Perhaps we need a semver.Sort interface.
-	//sort.Strings(repo.Packages())
-	err = templates.ExecuteTemplate(os.Stdout, "packageversions", Provider)
+	err = template.Must(template.New("packageversions").Parse(packageVersionsTemplate)).Execute(os.Stdout, Provider)
 	if err != nil {
 		Log.Fatal(err)
 	}
