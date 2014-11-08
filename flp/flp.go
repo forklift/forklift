@@ -62,7 +62,8 @@ func NewPackage(Forkliftfile []byte) (*Package, error) {
 }
 
 func ReadPackage(location string) (*Package, error) {
-	Forkliftfile, err := ioutil.ReadFile(path.Join(location, "Forkliftfile"))
+	location = path.Join(location, "Forkliftfile")
+	Forkliftfile, err := ioutil.ReadFile(location)
 	if err != nil {
 		return nil, err
 	}

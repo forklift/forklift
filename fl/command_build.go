@@ -19,6 +19,11 @@ var build = cli.Command{
 			Name:  "dirty, d",
 			Usage: "Don't clean after build.",
 		},
+		cli.StringFlag{
+			Name:  "out, o",
+			Usage: "Build output directory.",
+			Value: ".",
+		},
 	},
 }
 
@@ -41,7 +46,7 @@ func buildAction(c *cli.Context) {
 		Log.Fatal(err)
 	}
 
-	pkg := path.Join(location, flp.Tag(label.Version))
+	pkg := path.Join(c.String("out"), flp.Tag(label.Version))
 	//Start creating the package file.
 	storage, err := os.Create(pkg)
 	if err != nil {

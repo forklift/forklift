@@ -50,5 +50,5 @@ func (p *Local) Fetch(l *Label) (io.Reader, error) {
 }
 
 func (p *Local) Source(l *Label) (string, error) {
-	return "", nil
+	return l.Location, nil
 }
