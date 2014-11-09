@@ -8,10 +8,12 @@ import (
 	"github.com/forklift/forklift/semver"
 )
 
-var List = map[string]Provider{}
+var list = map[string]Provider{}
 
 var (
-	ErrorNoSuchProvider = errors.New("[Provider] No Such Provider.")
+	ErrorProviderNoSuch  = errors.New("[Provider] No Such Provider.")
+	ErrorProviderInvalid = errors.New("[Provider] Provider Invalid.")
+	ErrorProviderMissing = errors.New("[Provider] Please specifiy a provider.")
 
 	ErrorLabelEmpty   = errors.New("[Provider] The Label is empty.")
 	ErrorLabelInvalid = errors.New("[Provider] Invalid Label. Require 'provider:location package'")
@@ -23,6 +25,31 @@ type Label struct {
 
 	//If it is not the exact version requested for.
 	Alt bool
+}
+
+func SetDefault(uri string) error {
+
+	if uri == "" {
+		return ErrorProviderInvalid
+	}
+
+	parts := strings.SplitN(uri, ":", 2)
+
+	//Do we have such provider?
+	provider, ok := list[parts[0]]
+	if !ok {
+		return ErrorProviderNoSuch
+	}
+
+	// If there is no location,
+	// lets hope it accepts an empty location.
+	if len(parts) < 2 {
+		parts[1] = ""
+	}
+
+	list["default"] = provider
+
+	return list["default"].SetLocation(parts[1])
 }
 
 func Provide(uri string) (Provider, *Label, error) {
@@ -39,28 +66,32 @@ func Provide(uri string) (Provider, *Label, error) {
 
 	//File system?
 	if first == '.' || first == '/' {
-		provider = &Local{}
+		provider = &local{}
 		labelstring = uri
 
 	}
 
+	//Remote provider?
 	if provider == nil {
-
 		parts := strings.SplitN(uri, ":", 2)
 
 		if len(parts) == 2 {
 
 			var ok bool
-			if provider, ok = List[parts[0]]; !ok {
-				return nil, nil, ErrorNoSuchProvider
+			if provider, ok = list[parts[0]]; !ok {
+				return nil, nil, ErrorProviderNoSuch
 			}
 			labelstring = parts[1]
 
 		}
 	}
 
+	//Lets try if there is a default one.
 	if provider == nil {
-		provider = List["main"]
+		var ok bool
+		if provider, ok = list["default"]; !ok {
+			return nil, nil, ErrorProviderMissing
+		}
 		labelstring = uri
 	}
 
@@ -71,6 +102,10 @@ func Provide(uri string) (Provider, *Label, error) {
 
 type Provider interface {
 
+	//This method sets the location when it applies.
+	//Return an error on invalid location, ignore if it
+	//doesn't applies.
+	SetLocation(string) error
 	//This method parses a Label
 	//into Locatoin and Version, returns an error if
 	//invalid Label.

@@ -14,38 +14,33 @@ import (
 )
 
 func init() {
-	List["go"] = &GO{}
+	list["go"] = &http_go{}
 }
 
 //				 Name     Versions
-type GO struct {
+type http_go struct {
 	location *url.URL
 	packages []string
 }
 
-func (p *GO) SetLocation(location string) error {
+func (p *http_go) SetLocation(location string) error {
 	var err error
 	p.location, err = url.Parse(location)
 	return err
 }
 
-func (p GO) Location() string {
-	return p.location.String()
-}
-
-func (p *GO) Update() error {
-
+func (p *http_go) Update() error {
 	if p.location == nil {
 		return errors.New("Provider unset.")
 	}
 	return nil
 }
 
-func (p *GO) Parse(label string) (*Label, error) {
+func (p *http_go) Parse(label string) (*Label, error) {
 	return nil, nil
 }
 
-func (p *GO) Packages(filter string) ([]string, error) {
+func (p *http_go) Packages(filter string) ([]string, error) {
 
 	//If no filter or catch all, return it all.
 	if filter == "*" || filter == "" {
@@ -76,7 +71,7 @@ func (p *GO) Packages(filter string) ([]string, error) {
 	return filtered, nil
 }
 
-func (p *GO) Versions(filter string) ([]string, error) {
+func (p *http_go) Versions(filter string) ([]string, error) {
 
 	versions := []string{}
 
@@ -99,7 +94,7 @@ func (p *GO) Versions(filter string) ([]string, error) {
 	return versions, nil
 }
 
-func (p *GO) Fetch(l *Label) (io.Reader, error) {
+func (p *http_go) Fetch(l *Label) (io.Reader, error) {
 
 	if l.Location == "" {
 		return nil, errors.New("Package not found.")
@@ -122,6 +117,6 @@ func (p *GO) Fetch(l *Label) (io.Reader, error) {
 	return res.Body, nil
 }
 
-func (p *GO) Source(l *Label) (string, error) {
+func (p *http_go) Source(l *Label) (string, error) {
 	return "", nil
 }
