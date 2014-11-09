@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/omeid/semver"
+	"github.com/forklift/forklift/semver"
 )
 
 var List = map[string]Provider{}
@@ -36,24 +36,32 @@ func Provide(uri string) (Provider, *Label, error) {
 	)
 
 	first := uri[0]
+
+	//File system?
 	if first == '.' || first == '/' {
 		provider = &Local{}
 		labelstring = uri
 
-	} else {
+	}
+
+	if provider == nil {
 
 		parts := strings.SplitN(uri, ":", 2)
-		if len(parts) < 2 {
-			return nil, nil, ErrorLabelInvalid
+
+		if len(parts) == 2 {
+
+			var ok bool
+			if provider, ok = List[parts[0]]; !ok {
+				return nil, nil, ErrorNoSuchProvider
+			}
+			labelstring = parts[1]
+
 		}
+	}
 
-		var ok bool
-		if provider, ok = List[parts[0]]; !ok {
-			return nil, nil, ErrorNoSuchProvider
-		}
-
-		labelstring = parts[1]
-
+	if provider == nil {
+		provider = List["main"]
+		labelstring = uri
 	}
 
 	label, err := provider.Parse(labelstring)

@@ -26,6 +26,10 @@ func main() {
 			Name:  "verbose",
 			Usage: "Be talkative.",
 		},
+		cli.BoolFlag{
+			Name:  "robot",
+			Usage: "More structure and parsable output.",
+		},
 		cli.StringFlag{
 			Name:   "provider",
 			Value:  "s3:https://forklift.microcloud.io",

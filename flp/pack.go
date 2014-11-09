@@ -10,7 +10,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/omeid/semver"
+	"github.com/forklift/forklift/semver"
 )
 
 func Pack(pkg *Package, storage io.WriteCloser) (checksum []byte, err error) {

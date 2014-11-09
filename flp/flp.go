@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/omeid/semver"
+	"github.com/forklift/forklift/semver"
 	"gopkg.in/yaml.v2"
 )
 

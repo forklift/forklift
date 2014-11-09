@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/forklift/forklift/flp"
-	"github.com/omeid/semver"
+	"github.com/forklift/forklift/semver"
 )
 
 func init() {
