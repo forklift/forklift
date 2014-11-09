@@ -25,6 +25,7 @@ type http_go struct {
 
 func (p *http_go) SetLocation(location string) error {
 	var err error
+	//TODO: Should we Ping already?
 	p.location, err = url.Parse(location)
 	return err
 }

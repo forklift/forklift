@@ -33,7 +33,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "provider",
 			Value:  "s3:https://forklift.microcloud.io",
-			Usage:  "Repository Address. `type:location`",
+			Usage:  "Default Repo `type:location`",
 			EnvVar: "FORKLIFT_REPO",
 		},
 	}
@@ -43,20 +43,29 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
-		list,
-		versions,
-		show,
 		build,
 		clean,
+		show,
+		versions,
+		list,
 	}
 
 	app.Before = func(c *cli.Context) error {
 
 		Log = logrus.New()
-		Engine = engine.New(Log)
 
-		//TODO: short syntax for default provider! :/location/version.v32.32
-		//provider, err := providers.NewProvider(c.String("provider"))
+		err := providers.SetDefault(c.String("provider"))
+		if err != nil {
+			Log.Error(err)
+			return err
+		}
+
+		//Fireup a new Engine.
+		//INFO: This maybe possible to postpon later
+		//      When we actually need it.
+		//      Perhaps the package engine could be
+		//      just a bunch of functions like go/log.
+		Engine = engine.New(Log)
 		return nil
 	}
 	app.Run(os.Args)
