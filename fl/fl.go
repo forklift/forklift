@@ -12,7 +12,6 @@ import (
 //Behold the globals.
 var (
 	Log      engine.Logger
-	Engine   *engine.Engine
 	Provider providers.Provider
 )
 
@@ -53,19 +52,13 @@ func main() {
 	app.Before = func(c *cli.Context) error {
 
 		Log = logrus.New()
+		engine.Log = Log
 
 		err := providers.SetDefault(c.String("provider"))
 		if err != nil {
 			Log.Error(err)
 			return err
 		}
-
-		//Fireup a new Engine.
-		//INFO: This maybe possible to postpon later
-		//      When we actually need it.
-		//      Perhaps the package engine could be
-		//      just a bunch of functions like go/log.
-		Engine = engine.New(Log)
 		return nil
 	}
 	app.Run(os.Args)

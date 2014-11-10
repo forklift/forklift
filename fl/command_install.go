@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
+	"github.com/forklift/forklift/engine"
 	"github.com/forklift/forklift/providers"
 )
 
@@ -38,7 +39,7 @@ func installAction(c *cli.Context) {
 	}
 
 	root := c.String("root")
-	err = Engine.Install(pack, root)
+	err = engine.Install(pack, root)
 	if err != nil {
 		//	Engine.Clean(true)
 		//Maybe uninstall here?

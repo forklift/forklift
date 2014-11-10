@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
+	"github.com/forklift/forklift/engine"
 	"github.com/forklift/forklift/providers"
 )
 
@@ -30,7 +31,7 @@ func cleanAction(c *cli.Context) {
 		Log.Fatal(err)
 	}
 
-	err = Engine.Clean(location)
+	err = engine.Clean(location)
 	if err != nil {
 		Log.Error(err)
 		return

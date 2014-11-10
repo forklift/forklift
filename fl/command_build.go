@@ -6,6 +6,7 @@ import (
 	"path"
 
 	"github.com/codegangsta/cli"
+	"github.com/forklift/forklift/engine"
 	"github.com/forklift/forklift/flp"
 	"github.com/forklift/forklift/providers"
 )
@@ -59,7 +60,7 @@ func buildAction(c *cli.Context) {
 		}
 	}()
 
-	checksum, err := Engine.Build(location, storage)
+	checksum, err := engine.Build(location, storage)
 	if err != nil {
 		Log.Error(err)
 		return
@@ -68,7 +69,7 @@ func buildAction(c *cli.Context) {
 	Log.Info(fmt.Sprintf("sha256sum: %x ", checksum))
 
 	if !c.Bool("dirty") {
-		err = Engine.Clean(location)
+		err = engine.Clean(location)
 		if err != nil {
 			Log.Error(err)
 			return

@@ -7,16 +7,10 @@ import (
 	"github.com/forklift/forklift/flp"
 )
 
-func New(log Logger) *Engine {
-	return &Engine{log: log}
-}
-
-type Engine struct {
-	log Logger
-}
+var Log Logger
 
 //Build
-func (e *Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
+func Build(dir string, storage io.WriteCloser) ([]byte, error) {
 
 	pkg, err := flp.ReadPackage(dir)
 	if err != nil {
@@ -29,10 +23,10 @@ func (e *Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
 		return nil, err
 	}
 
-	e.log.Info("Starting: build...")
-	err = run(e.log, pkg.Build, true)
+	Log.Info("Starting: build...")
+	err = run(Log, pkg.Build, true)
 	if err != nil {
-		e.log.Error(err)
+		Log.Error(err)
 		return nil, err
 	}
 	return flp.Pack(pkg, storage)
@@ -40,7 +34,7 @@ func (e *Engine) Build(dir string, storage io.WriteCloser) ([]byte, error) {
 
 //Clean
 
-func (e *Engine) Clean(dir string) error {
+func Clean(dir string) error {
 
 	pkg, err := flp.ReadPackage(dir)
 	if err != nil {
@@ -55,12 +49,12 @@ func (e *Engine) Clean(dir string) error {
 
 	//"run" with false never returns anything,
 	// All the errors are logged directly.
-	e.log.Info("Starting: Cleaning..")
-	return run(e.log, pkg.Clean, false)
+	Log.Info("Starting: Cleaning..")
+	return run(Log, pkg.Clean, false)
 }
 
 // Install
-func (e *Engine) Install(pack io.Reader, root string) error {
+func Install(pack io.Reader, root string) error {
 
 	var err error
 	if root != "/" {
@@ -78,24 +72,24 @@ func (e *Engine) Install(pack io.Reader, root string) error {
 	}
 
 	if err != nil {
-		e.log.Error(err)
+		Log.Error(err)
 		return err
 	}
 
 	pkg, err := flp.Unpack(pack, root, false)
 	if err != nil {
-		e.log.Error(err)
+		Log.Error(err)
 		return err
 	}
 
-	e.log.Info("Starting: Post Install..")
-	err = run(e.log, pkg.Install, true)
+	Log.Info("Starting: Post Install..")
+	err = run(Log, pkg.Install, true)
 	if err != nil {
-		e.log.Error(err)
+		Log.Error(err)
 		//e.log.Warn("Post install Faild. Uninstalling.")
 		//e.Uninstall(pkg)
 	}
 
-	e.log.Print("Package installed successfuly.", pkg.Version)
+	Log.Print("Package installed successfuly.", pkg.Version)
 	return nil
 }
