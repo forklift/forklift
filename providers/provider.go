@@ -68,21 +68,17 @@ func Provide(uri string) (Provider, *Label, error) {
 	if first == '.' || first == '/' {
 		provider = &local{}
 		labelstring = uri
-
 	}
 
 	//Remote provider?
 	if provider == nil {
 		parts := strings.SplitN(uri, ":", 2)
-
 		if len(parts) == 2 {
-
 			var ok bool
 			if provider, ok = list[parts[0]]; !ok {
 				return nil, nil, ErrorProviderNoSuch
 			}
 			labelstring = parts[1]
-
 		}
 	}
 
@@ -94,7 +90,6 @@ func Provide(uri string) (Provider, *Label, error) {
 		}
 		labelstring = uri
 	}
-
 	label, err := provider.Parse(labelstring)
 	return provider, label, err
 

@@ -73,8 +73,8 @@ dependencies:
 # during build.
 files:
  - bin/fl
- - etc/forklift/
- - etc/forklift/installed/
+ - etc/forklift
+ - etc/forklift/installed
 
 
 

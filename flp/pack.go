@@ -13,7 +13,7 @@ import (
 	"github.com/forklift/forklift/semver"
 )
 
-func Pack(pkg *Package, storage io.WriteCloser) (checksum []byte, err error) {
+func Pack(root string, pkg *Package, storage io.WriteCloser) (checksum []byte, err error) {
 
 	hash := sha256.New()
 	w := io.MultiWriter(storage, hash)
@@ -45,7 +45,7 @@ func Pack(pkg *Package, storage io.WriteCloser) (checksum []byte, err error) {
 
 	//Add files to the package.
 	for _, path := range pkg.Files {
-		err = writeFile(path, tar)
+		err = writeFile(root, path, tar)
 		if err != nil {
 			return nil, err
 		}
@@ -58,15 +58,16 @@ func Pack(pkg *Package, storage io.WriteCloser) (checksum []byte, err error) {
 	return checksum, nil
 }
 
-func writeFile(p string, tarstream *tar.Writer) error {
+func writeFile(root string, name string, tarstream *tar.Writer) error {
 
-	file, err := os.Open(p)
+	longpath := filepath.Join(root, name)
+	file, err := os.Open(longpath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	fi, err := os.Lstat(p)
+	fi, err := os.Lstat(longpath)
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func writeFile(p string, tarstream *tar.Writer) error {
 	var link string
 
 	if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
-		link, err = filepath.EvalSymlinks(p)
+		link, err = filepath.EvalSymlinks(longpath)
 		if err != nil {
 			return err
 		}
@@ -82,13 +83,13 @@ func writeFile(p string, tarstream *tar.Writer) error {
 
 	th, err := tar.FileInfoHeader(fi, link)
 	if err != nil {
-		return fmt.Errorf("Header Error: %q: %v", p, err)
+		return fmt.Errorf("Header Error: %q: %v", name, err)
 	}
 
-	th.Name = p
+	th.Name = name
 
 	if err := tarstream.WriteHeader(th); err != nil {
-		return fmt.Errorf("Write Failed: %q: %v", p, err)
+		return fmt.Errorf("Write Failed: %q: %v", name, err)
 	}
 	if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
 		return nil
@@ -96,17 +97,17 @@ func writeFile(p string, tarstream *tar.Writer) error {
 
 	if !fi.IsDir() {
 		if _, err := io.Copy(tarstream, file); err != nil {
-			return fmt.Errorf("Write Failed: %q: %v", p, err)
+			return fmt.Errorf("Write Failed: %q: %v", name, err)
 		}
 		return nil
 	}
 
 	subs, err := file.Readdirnames(0)
 	if err != nil {
-		return fmt.Errorf("Read Failed: %q: %v", p, err)
+		return fmt.Errorf("Read Failed: %q: %v", name, err)
 	}
-	for _, name := range subs {
-		if err := writeFile(filepath.Join(p, name), tarstream); err != nil {
+	for _, s := range subs {
+		if err := writeFile(root, filepath.Join(name, s), tarstream); err != nil {
 			return err
 		}
 	}

@@ -46,6 +46,9 @@ func buildAction(c *cli.Context) {
 	if err != nil {
 		Log.Fatal(err)
 	}
+	if label == nil {
+		Log.Error("No Forkliftfile in Source.")
+	}
 
 	pkg := path.Join(c.String("out"), flp.Tag(label.Version))
 	//Start creating the package file.
