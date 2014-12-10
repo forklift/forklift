@@ -7,12 +7,14 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/forklift/forklift/engine"
 	"github.com/forklift/forklift/providers"
+	"github.com/forklift/geppetto/api"
 )
 
 //Behold the globals.
 var (
 	Log      engine.Logger
 	Provider providers.Provider
+	Server   *api.Server
 )
 
 func main() {
@@ -21,6 +23,19 @@ func main() {
 	app.Name = "forklift"
 	app.Usage = "The software provisioning tool."
 	app.Flags = []cli.Flag{
+
+		cli.BoolFlag{
+			Name:  "remote",
+			Usage: "Run the task using the remote host.",
+		},
+
+		cli.StringFlag{
+			Name:   "host",
+			Usage:  "Remote build server address.",
+			Value:  "http://localhost:7070",
+			EnvVar: "FORKLIFT_HOST",
+		},
+
 		cli.BoolFlag{
 			Name:  "verbose",
 			Usage: "Be talkative.",
@@ -42,6 +57,7 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
+		ping,
 		build,
 		clean,
 		show,
@@ -55,10 +71,20 @@ func main() {
 		engine.Log = Log
 
 		err := providers.SetDefault(c.String("provider"))
+
+		//If no error and remote, connect and ping.
+		if err == nil && c.Bool("remote") {
+			Server, err = api.NewClient(c.String("host"))
+			if err == nil {
+				err = Server.Ping()
+			}
+		}
+
 		if err != nil {
 			Log.Error(err)
 			return err
 		}
+
 		return nil
 	}
 	app.Run(os.Args)

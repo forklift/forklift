@@ -12,9 +12,15 @@ import (
 )
 
 var build = cli.Command{
-	Name:   "build",
-	Usage:  "Build a Forklift Package from an florklift.json",
-	Action: buildAction,
+	Name:  "build",
+	Usage: "Build a Forklift Package from an florklift.json",
+	Action: func(c *cli.Context) {
+		if c.Bool("remote") {
+			localBuild(c)
+		} else {
+			remoteBuild(c)
+		}
+	},
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "dirty, d",
@@ -28,7 +34,10 @@ var build = cli.Command{
 	},
 }
 
-func buildAction(c *cli.Context) {
+func remoteBuild(c *cli.Context) {
+}
+
+func localBuild(c *cli.Context) {
 
 	arg := c.Args().First()
 

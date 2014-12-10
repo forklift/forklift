@@ -33,3 +33,5 @@ test-db
 ./cli/cli
 ./cli/fl
 forklift-0.0.1-alpha.1.flp
+forklift/forklift
+fl/fl
